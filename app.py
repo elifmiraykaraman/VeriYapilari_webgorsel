@@ -12,7 +12,6 @@ def create_graph(file_path):
     try:
         df = pd.read_excel(file_path)
         df = df.iloc[:250]
-
     except Exception as e:
         raise ValueError(f"Excel dosyası okunamadı: {e}")
 
@@ -72,7 +71,7 @@ def most_collaborative_author(G):
 
     return most_collaborative, max_collaborations
 
-def graph_to_json(G, author_papers):
+def graph_to_json(G, author_papers, author_article_count, threshold):
     graph = nx.Graph()
     for node, edges in G.items():
         for neighbor, weight in edges.items():
@@ -80,10 +79,22 @@ def graph_to_json(G, author_papers):
 
     nodes_data = []
     for node in graph.nodes():
+        size = 10
+        color = "lightgray"
+        if node in author_article_count:
+            article_count = author_article_count[node]
+            if article_count > threshold:
+                size = 20
+                color = "darkblue"
+            else:
+                size = 10
+                color = "lightblue"
         nodes_data.append({
             'id': node,
             'label': node,
             'title': f"Yazar: {node}<br>Makaleler: {', '.join(author_papers.get(node, []))}",
+            'size': size,
+            'color': color,
         })
 
     edges_data = []
@@ -142,6 +153,15 @@ def home():
     longest_path = None
     total_collaborations = None
     paths = None
+
+    try:
+        # Grafiği oluştur
+        G, author_papers = create_graph(EXCEL_FILE_PATH)
+        df = pd.read_excel(EXCEL_FILE_PATH)
+        author_article_count, threshold = calculate_author_statistics(df)
+    except Exception as e:
+        error = f"Veri seti yüklenirken hata oluştu: {e}"
+        return render_template('index.html', error=error)
 
     if request.method == 'POST':
         action = request.form.get('action')

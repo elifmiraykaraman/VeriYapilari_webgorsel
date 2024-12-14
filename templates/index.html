@@ -20,7 +20,7 @@
     <div id="controls">
         <h2>İşlemler</h2>
 
-        <!-- Formlar -->
+        <!-- 1. En Kısa Yol Bulma -->
         <form method="POST">
             <input type="hidden" name="action" value="shortest_path">
             <h3>1. En Kısa Yol Bulma</h3>
@@ -35,7 +35,7 @@
             <button type="submit">En Kısa Yolu Bul</button>
         </form>
 
-        <!-- Diğer Formlar -->
+        <!-- 2. Priority Queue Oluşturma -->
         <form method="POST">
             <input type="hidden" name="action" value="priority_queue">
             <h3>2. Priority Queue Oluşturma</h3>
@@ -46,6 +46,7 @@
             <button type="submit">Queue'yu Oluştur</button>
         </form>
 
+        <!-- 3. BST Oluşturma -->
         <form method="POST">
             <input type="hidden" name="action" value="create_bst">
             <h3>3. BST Oluşturma</h3>
@@ -60,9 +61,39 @@
             <button type="submit">BST'yi Güncelle</button>
         </form>
 
+        <!-- 4. A Yazarı ve İşbirlikçi Yazarlar Arasında Kısa Yollar -->
+        <form method="POST">
+            <input type="hidden" name="action" value="collaboration_shortest_paths">
+            <h3>4. A Yazarı ve İşbirlikçi Yazarlar Arasında Kısa Yollar</h3>
+            <div class="input-group">
+                <label for="author_a_collab">A Yazarının Adı:</label>
+                <input type="text" id="author_a_collab" name="author_a" required>
+            </div>
+            <button type="submit">Kısa Yolları Hesapla</button>
+        </form>
+
+        <!-- 5. A Yazarının İşbirliği Yaptığı Yazar Sayısını Hesaplama -->
+        <form method="POST">
+            <input type="hidden" name="action" value="collaboration_count">
+            <h3>5. A Yazarının İşbirliği Yaptığı Yazar Sayısı</h3>
+            <div class="input-group">
+                <label for="author_a_count">A Yazarının Adı:</label>
+                <input type="text" id="author_a_count" name="author_a" required>
+            </div>
+            <button type="submit">Yazar Sayısını Hesapla</button>
+        </form>
+
+        <!-- 6. En Çok İşbirliği Yapan Yazar -->
+        <form method="POST">
+            <input type="hidden" name="action" value="most_collaborative_author">
+            <h3>6. En Çok İşbirliği Yapan Yazar</h3>
+            <button type="submit">En Çok İşbirliği Yapan Yazar</button>
+        </form>
+
+        <!-- 7. En Uzun Yol -->
         <form method="POST">
             <input type="hidden" name="action" value="longest_path">
-            <h3>4. En Uzun Yol Bulma</h3>
+            <h3>7. En Uzun Yol Bulma</h3>
             <div class="input-group">
                 <label for="author_a_longest">Yazarın Adı:</label>
                 <input type="text" id="author_a_longest" name="author_a" required>

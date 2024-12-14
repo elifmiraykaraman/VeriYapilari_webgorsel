@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="">
+    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="istenilen sayfa düzenine ulaşıldı">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -39,6 +38,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;elifmiraykaraman&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/elifmiraykaraman/VeriYapilari_webgorsel.git&quot;,
+    &quot;accountId&quot;: &quot;a186e46c-69f8-4e61-a59c-4aa5391b149e&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -109,12 +120,35 @@
       <workItem from="1734189697118" duration="306000" />
       <workItem from="1734190050238" duration="126000" />
       <workItem from="1734190190867" duration="388000" />
-      <workItem from="1734190605478" duration="2406000" />
+      <workItem from="1734190605478" duration="5491000" />
+      <workItem from="1734199618241" duration="2051000" />
     </task>
+    <task id="LOCAL-00001" summary="istenilen sayfa düzenine ulaşıldı">
+      <option name="closed" value="true" />
+      <created>1734193357274</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1734193357274</updated>
+    </task>
+    <task id="LOCAL-00002" summary="istenilen sayfa düzenine ulaşıldı">
+      <option name="closed" value="true" />
+      <created>1734193371635</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1734193371635</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="İlk commit" />
+    <MESSAGE value="istenilen sayfa düzenine ulaşıldı" />
+    <option name="LAST_COMMIT_MESSAGE" value="istenilen sayfa düzenine ulaşıldı" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PROLAB_3$PROLAB_3.coverage" NAME="PROLAB_3 Coverage Results" MODIFIED="1734172202290" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
