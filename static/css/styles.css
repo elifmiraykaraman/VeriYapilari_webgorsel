@@ -1,0 +1,96 @@
+/* Genel Sayfa Stili */
+body {
+    display: flex; /* Bölümleri yan yana yerleştir */
+    margin: 0;
+    padding: 0;
+    height: 100vh; /* Sayfanın tam yüksekliği */
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+}
+
+/* Sol tarafta Çıktı Ekranı */
+#output {
+    width: 20%; /* Sol tarafta genişlik oranı */
+    padding: 10px;
+    box-sizing: border-box;
+    border-right: 1px solid #ccc; /* Sağ tarafa sınır çizgisi */
+    background-color: #f9f9f9; /* Açık gri arka plan */
+    display: flex;
+    justify-content: center; /* İçeriği yatay ortala */
+    align-items: center; /* İçeriği dikey ortala */
+    text-align: center; /* Metni ortala */
+}
+
+#output h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Orta alan: Görselleştirme alanı */
+#network {
+    width: 60%; /* Orta alan genişliği */
+    height: 100%; /* Tam yüksekliği kullan */
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    border-left: 1px solid #ccc; /* Sol tarafa sınır çizgisi */
+    border-right: 1px solid #ccc; /* Sağ tarafa sınır çizgisi */
+}
+
+/* Sağ tarafta Kontrol Paneli */
+#controls {
+    width: 20%; /* Sağ taraf genişliği */
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #ffffff; /* Beyaz arka plan */
+    display: flex;
+    flex-direction: column; /* Dikey hizalama */
+    align-items: center; /* İçeriği ortala */
+    gap: 10px; /* Butonlar arası boşluk */
+}
+
+/* Buton Stili */
+button {
+    width: 80%; /* Buton genişliği */
+    padding: 10px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px; /* Yuvarlak köşeler */
+    cursor: pointer;
+    text-align: center;
+}
+
+button:hover {
+    background-color: #45a049; /* Hover efekti */
+}
+
+/* Form Grupları */
+.input-group {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+/* Form Başlıkları */
+form h3 {
+    text-align: center;
+    margin: 10px 0;
+}
