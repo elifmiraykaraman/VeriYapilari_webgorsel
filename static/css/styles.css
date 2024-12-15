@@ -1,25 +1,26 @@
 /* Genel Sayfa Stili */
 body {
-    display: flex; /* Bölümleri yan yana yerleştir */
+    display: flex; /* Bölümleri yatay olarak hizala */
     margin: 0;
     padding: 0;
-    height: 100vh; /* Sayfanın tam yüksekliği */
+    height: 100vh; /* Sayfanın tamamını kullan */
     font-family: Arial, sans-serif;
     background-color: #ffffff;
+    overflow: hidden; /* Taşmaları önle */
 }
-
 /* Sol tarafta Çıktı Ekranı */
 #output {
-    width: 20%; /* Sol tarafta genişlik oranı */
-    padding: 10px;
+    width: 20%; /* Sol taraf genişliği */
+    height: 100vh; /* Tam sayfa yüksekliği */
     box-sizing: border-box;
-    border-right: 1px solid #ccc; /* Sağ tarafa sınır çizgisi */
-    background-color: #f9f9f9; /* Açık gri arka plan */
+    border-right: 1px solid #ccc;
     display: flex;
-    justify-content: center; /* İçeriği yatay ortala */
-    align-items: center; /* İçeriği dikey ortala */
-    text-align: center; /* Metni ortala */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #f9f9f9; /* Açık gri arka plan */
 }
+
 
 #output h2 {
     font-size: 18px;
@@ -27,54 +28,56 @@ body {
     margin: 0;
 }
 
+
 /* Orta alan: Görselleştirme alanı */
 #network {
-    width: 60%; /* Orta alan genişliği */
-    height: 100%; /* Tam yüksekliği kullan */
-    padding: 10px;
+    flex: 1; /* Kalan alanı tamamen kapla */
+    height: 100vh; /* Tam yükseklik */
     box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #fff;
-    border-left: 1px solid #ccc; /* Sol tarafa sınır çizgisi */
-    border-right: 1px solid #ccc; /* Sağ tarafa sınır çizgisi */
+    margin: 0; /* Kenar boşluklarını kaldır */
+    padding: 0; /* İç boşlukları kaldır */
+    background-color: #ffffff; /* Beyaz arka plan */
+    display: block; /* Blok olarak genişle */
+    border-left: 1px solid #ccc; /* Sol kenarlık */
+    border-right: 1px solid #ccc; /* Sağ kenarlık */
 }
 
 /* Sağ tarafta Kontrol Paneli */
 #controls {
     width: 20%; /* Sağ taraf genişliği */
-    padding: 10px;
+    height: 100vh; /* Tam sayfa yüksekliği */
     box-sizing: border-box;
-    background-color: #ffffff; /* Beyaz arka plan */
+    border-left: 1px solid #ccc;
+    padding: 10px;
     display: flex;
-    flex-direction: column; /* Dikey hizalama */
-    align-items: center; /* İçeriği ortala */
-    gap: 10px; /* Butonlar arası boşluk */
+    flex-direction: column;
+    gap: 10px; /* Öğeler arası boşluk */
+    background-color: #ffffff;
+    overflow-y: auto; /* Dikey kaydırma */
 }
 
-/* Buton Stili */
+/* Sağ Panel Butonları */
 button {
-    width: 80%; /* Buton genişliği */
+    width: 100%; /* Buton genişliği */
     padding: 10px;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: bold;
     background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 5px; /* Yuvarlak köşeler */
+    border-radius: 5px;
     cursor: pointer;
-    text-align: center;
+    margin-bottom: 5px;
 }
 
 button:hover {
-    background-color: #45a049; /* Hover efekti */
+    background-color: #45a049;
 }
 
-/* Form Grupları */
+
+/* Sağ Panel Input ve Label */
 .input-group {
-    width: 100%;
-    text-align: left;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .input-group label {
@@ -87,6 +90,8 @@ button:hover {
     width: 100%;
     padding: 8px;
     box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 3px;
 }
 
 /* Form Başlıkları */
@@ -94,3 +99,11 @@ form h3 {
     text-align: center;
     margin: 10px 0;
 }
+
+/* HTML ve Body Reset */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+

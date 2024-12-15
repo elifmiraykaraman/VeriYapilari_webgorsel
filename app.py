@@ -11,7 +11,7 @@ EXCEL_FILE_PATH = r"C:\Users\Acer\PycharmProjects\PROLAB_3\PROLAB 3 - GUNCEL DAT
 def create_graph(file_path):
     try:
         df = pd.read_excel(file_path)
-        df = df.iloc[:450]
+        df = df.iloc[:500]
     except Exception as e:
         raise ValueError(f"Excel dosyası okunamadı: {e}")
 
@@ -52,16 +52,40 @@ def graph_to_json(G, author_papers):
         for neighbor, weight in edges.items():
             graph.add_edge(node, neighbor, weight=weight)
 
+        # Toplam kenar ağırlıklarını hesapla
+    total_weights = {}
+    degrees = {}
+    for node in graph.nodes():
+        total_weight = sum(data['weight'] for _, _, data in graph.edges(node, data=True))
+        total_weights[node] = total_weight
+        degrees[node] = graph.degree(node)  # Düğüm bağlantı sayısı
+
+        # Ortalama kenar ağırlığını hesapla
+    total_sum = sum(total_weights.values())
+    average_weight = total_sum / len(total_weights) if total_weights else 0
+    threshold = average_weight * 1.2  # %20 üzerinde olanlar için threshold
+
+    # Düğümleri JSON formatına ekle
     nodes_data = []
     for node in graph.nodes():
+        total_weight = total_weights.get(node, 0)
+        degree = degrees.get(node, 0)
+        if total_weight > threshold:
+            size = 20 + degree * 2  # Büyük düğümler için ekstra boyut (bağlantı sayısına göre artar)
+            color = "darkblue"  # Koyu renk
+        else:
+            size = 10 + degree * 1.5  # Küçük düğümler için boyut
+            color = "lightblue"  # Açık renk
+
         nodes_data.append({
             'id': node,
             'label': node,
             'title': f"Yazar: {node}<br>Makaleler: {', '.join(author_papers.get(node, []))}",
-            'size': 10,
-            'color': "lightblue"
+            'size': size,
+            'color': color
         })
 
+    # Kenarları JSON formatına ekle
     edges_data = []
     for u, v, data in graph.edges(data=True):
         edges_data.append({

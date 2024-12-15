@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="istenilen sayfa düzenine ulaşıldı">
+    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="düğümler sayfanın ortasına geldi.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,6 +123,7 @@
       <workItem from="1734190190867" duration="388000" />
       <workItem from="1734190605478" duration="5491000" />
       <workItem from="1734199618241" duration="2051000" />
+      <workItem from="1734267444259" duration="3557000" />
     </task>
     <task id="LOCAL-00001" summary="istenilen sayfa düzenine ulaşıldı">
       <option name="closed" value="true" />
@@ -140,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734193371635</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="düğümler sayfanın ortasına geldi.">
+      <option name="closed" value="true" />
+      <created>1734262462422</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1734262462422</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -149,7 +158,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="İlk commit" />
     <MESSAGE value="istenilen sayfa düzenine ulaşıldı" />
-    <option name="LAST_COMMIT_MESSAGE" value="istenilen sayfa düzenine ulaşıldı" />
+    <MESSAGE value="düğümler sayfanın ortasına geldi." />
+    <option name="LAST_COMMIT_MESSAGE" value="düğümler sayfanın ortasına geldi." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PROLAB_3$PROLAB_3.coverage" NAME="PROLAB_3 Coverage Results" MODIFIED="1734261960929" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
