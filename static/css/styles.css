@@ -1,26 +1,29 @@
 /* Genel Sayfa Stili */
-body {
-    display: flex; /* Bölümleri yatay olarak hizala */
+body, html {
     margin: 0;
     padding: 0;
-    height: 100vh; /* Sayfanın tamamını kullan */
+    height: 100%;
     font-family: Arial, sans-serif;
-    background-color: #ffffff;
-    overflow: hidden; /* Taşmaları önle */
+    overflow: hidden; /* Sayfa taşmasını önle */
+    background-color: #ffffff; /* Arka plan rengi */
 }
+
+body {
+    display: flex; /* Sayfanın bölümlerini yatay hizala */
+}
+
 /* Sol tarafta Çıktı Ekranı */
 #output {
-    width: 20%; /* Sol taraf genişliği */
+    width: 20%; /* Sol panel genişliği */
     height: 100vh; /* Tam sayfa yüksekliği */
     box-sizing: border-box;
-    border-right: 1px solid #ccc;
+    border-right: 1px solid #ccc; /* Sağ kenarlık */
+    background-color: #f9f9f9; /* Açık gri arka plan */
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
-    background-color: #f9f9f9; /* Açık gri arka plan */
 }
-
 
 #output h2 {
     font-size: 18px;
@@ -28,11 +31,10 @@ body {
     margin: 0;
 }
 
-
-/* Orta alan: Görselleştirme alanı */
+/* Orta alan: Grafik Görselleştirme Alanı */
 #network {
     flex: 1; /* Kalan alanı tamamen kapla */
-    height: 100vh; /* Tam yükseklik */
+    height: 100vh; /* Tam sayfa yüksekliği */
     box-sizing: border-box;
     margin: 0; /* Kenar boşluklarını kaldır */
     padding: 0; /* İç boşlukları kaldır */
@@ -44,66 +46,75 @@ body {
 
 /* Sağ tarafta Kontrol Paneli */
 #controls {
-    width: 20%; /* Sağ taraf genişliği */
+    width: 20%; /* Sağ panel genişliği */
     height: 100vh; /* Tam sayfa yüksekliği */
     box-sizing: border-box;
-    border-left: 1px solid #ccc;
+    border-left: 1px solid #ccc; /* Sol kenarlık */
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 10px; /* Öğeler arası boşluk */
-    background-color: #ffffff;
-    overflow-y: auto; /* Dikey kaydırma */
+    background-color: #ffffff; /* Beyaz arka plan */
+    overflow-y: auto; /* İçerik taşarsa dikey kaydırma */
 }
 
-/* Sağ Panel Butonları */
+/* Buton Stili */
 button {
     width: 100%; /* Buton genişliği */
     padding: 10px;
     font-size: 14px;
     font-weight: bold;
-    background-color: #4CAF50;
+    background-color: #4CAF50; /* Yeşil buton rengi */
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 5px; /* Köşe yuvarlaklığı */
     cursor: pointer;
     margin-bottom: 5px;
+    transition: background-color 0.3s ease; /* Hover efekti için geçiş */
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #45a049; /* Hover rengi */
 }
 
-
-/* Sağ Panel Input ve Label */
+/* Input Grupları */
 .input-group {
-    margin-bottom: 10px;
+    margin-bottom: 10px; /* Alt boşluk */
 }
 
 .input-group label {
-    display: block;
+    display: block; /* Label'ları blok olarak hizala */
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 5px; /* Label alt boşluk */
 }
 
 .input-group input {
-    width: 100%;
+    width: 100%; /* Input genişliği */
     padding: 8px;
     box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    border: 1px solid #ccc; /* Input kenarlık */
+    border-radius: 3px; /* Köşe yuvarlaklığı */
+    font-size: 14px;
 }
 
 /* Form Başlıkları */
 form h3 {
     text-align: center;
     margin: 10px 0;
+    font-size: 16px;
+    color: #333; /* Başlık rengi */
 }
 
-/* HTML ve Body Reset */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+/* Kaydırma Çubuğu (Scrollbar) */
+#controls::-webkit-scrollbar {
+    width: 8px; /* Kaydırma çubuğu genişliği */
 }
 
+#controls::-webkit-scrollbar-thumb {
+    background-color: #aaa; /* Kaydırma çubuğu rengi */
+    border-radius: 10px; /* Köşe yuvarlaklığı */
+}
+
+#controls::-webkit-scrollbar-thumb:hover {
+    background-color: #888; /* Hover rengi */
+}

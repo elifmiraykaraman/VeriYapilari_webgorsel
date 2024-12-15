@@ -5,114 +5,194 @@
     <title>Yazar İşbirliği Ağı</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
     <link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
-    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" type="text/css" />
+    <style>
+
+        /* Genel reset ve taşmayı engelle */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Kenar kutuları dahil */
+}
+
+        /* Genel Sayfa Stili */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* Sayfanın taşmasını engelle */
+        }
+
+        /* Ana yapı */
+    body {
+        display: flex;
+        flex-direction: row; /* Sol - Orta - Sağ düzen */
+        font-family: Arial, sans-serif;
+        }
+
+        /* Sol Çıktı Ekranı */
+        #output {
+            width: 20%;
+            background-color: #f9f9f9;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        /* Orta Grafik Alanı */
+        #network {
+            flex: 1;
+            height: 100vh;
+            box-sizing: border-box;
+            border: 1px solid lightgray;
+            overflow: hidden; /* Taşmayı önle */
+        }
+
+        /* Sağ Tarafa Sabit "İsterler" Alanı */
+        #controls {
+            width: 20%;
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            overflow-y: auto; /* Uzun içerik için kaydırma */
+            background-color: #f9f9f9;
+            border-left: 1px solid #ccc;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Form Stili */
+        form {
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Buton Stili */
+        button {
+            width: 100%;
+            margin-top: 5px;
+            padding: 8px;
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
+    <!-- Sol Çıktı Ekranı -->
     <div id="output">
         <h2>ÇIKTI EKRANI</h2>
+        <div id="output-content">Sonuçlar burada gösterilecek.</div>
     </div>
 
-<div id="network" style="width: 100%; height: 500px; border: 1px solid lightgray;">
-        <!-- Grafik Görselleştirme Alanı -->
-        <img src="static/images/placeholder-graph.png" alt="Görselleştirme Alanı" style="width:100%; height:100%;">
-    </div>
 
+    <!-- Orta Grafik Alanı -->
+    <div id="network"></div>
+
+    <!-- Sağ Tarafa Sabit "İsterler" Alanı -->
     <div id="controls">
-        <h2>İşlemler</h2>
+        <h2>İsterler</h2>
 
         <!-- 1. En Kısa Yol Bulma -->
         <form method="POST">
-            <input type="hidden" name="action" value="shortest_path">
             <h3>1. En Kısa Yol Bulma</h3>
-            <div class="input-group">
-                <label for="author_a">A Yazarının Adı:</label>
-                <input type="text" id="author_a" name="author_a" required>
-            </div>
-            <div class="input-group">
-                <label for="author_b">B Yazarının Adı:</label>
-                <input type="text" id="author_b" name="author_b" required>
-            </div>
+            <label for="author_a">A Yazarının Adı:</label>
+            <input type="text" id="author_a" name="author_a" required>
+            <label for="author_b">B Yazarının Adı:</label>
+            <input type="text" id="author_b" name="author_b" required>
             <button type="submit">En Kısa Yolu Bul</button>
         </form>
 
         <!-- 2. Priority Queue Oluşturma -->
         <form method="POST">
-            <input type="hidden" name="action" value="priority_queue">
             <h3>2. Priority Queue Oluşturma</h3>
-            <div class="input-group">
-                <label for="author_a_pq">A Yazarının Adı:</label>
-                <input type="text" id="author_a_pq" name="author_a" required>
-            </div>
+            <label for="author_a_pq">A Yazarının Adı:</label>
+            <input type="text" id="author_a_pq" name="author_a" required>
             <button type="submit">Queue'yu Oluştur</button>
         </form>
 
         <!-- 3. BST Oluşturma -->
         <form method="POST">
-            <input type="hidden" name="action" value="create_bst">
             <h3>3. BST Oluşturma</h3>
-            <div class="input-group">
-                <label for="author_a_bst">A Yazarının Adı:</label>
-                <input type="text" id="author_a_bst" name="author_a" required>
-            </div>
-            <div class="input-group">
-                <label for="remove_author">BST'den Çıkarılacak Yazar:</label>
-                <input type="text" id="remove_author" name="remove_author">
-            </div>
+            <label for="author_a_bst">A Yazarının Adı:</label>
+            <input type="text" id="author_a_bst" name="author_a" required>
+            <label for="remove_author">BST'den Çıkarılacak Yazar:</label>
+            <input type="text" id="remove_author" name="remove_author">
             <button type="submit">BST'yi Güncelle</button>
         </form>
 
-        <!-- 4. A Yazarı ve İşbirlikçi Yazarlar Arasında Kısa Yollar -->
+        <!-- 4. Kısa Yollar Hesaplama -->
         <form method="POST">
-            <input type="hidden" name="action" value="collaboration_shortest_paths">
             <h3>4. A Yazarı ve İşbirlikçi Yazarlar Arasında Kısa Yollar</h3>
-            <div class="input-group">
-                <label for="author_a_collab">A Yazarının Adı:</label>
-                <input type="text" id="author_a_collab" name="author_a" required>
-            </div>
+            <label for="author_a_collab">A Yazarının Adı:</label>
+            <input type="text" id="author_a_collab" name="author_a" required>
             <button type="submit">Kısa Yolları Hesapla</button>
         </form>
 
-        <!-- 5. A Yazarının İşbirliği Yaptığı Yazar Sayısını Hesaplama -->
+        <!-- 5. Yazar Sayısı Hesaplama -->
         <form method="POST">
-            <input type="hidden" name="action" value="collaboration_count">
             <h3>5. A Yazarının İşbirliği Yaptığı Yazar Sayısı</h3>
-            <div class="input-group">
-                <label for="author_a_count">A Yazarının Adı:</label>
-                <input type="text" id="author_a_count" name="author_a" required>
-            </div>
+            <label for="author_a_count">A Yazarının Adı:</label>
+            <input type="text" id="author_a_count" name="author_a" required>
             <button type="submit">Yazar Sayısını Hesapla</button>
         </form>
 
-        <!-- 6. En Çok İşbirliği Yapan Yazar -->
-        <form method="POST">
-            <input type="hidden" name="action" value="most_collaborative_author">
-            <h3>6. En Çok İşbirliği Yapan Yazar</h3>
-            <button type="submit">En Çok İşbirliği Yapan Yazar</button>
+       <!-- 6. En Çok İşbirliği Yapan Yazar -->
+        <form id="most-collaborative-form">
+             <h3>6. En Çok İşbirliği Yapan Yazar</h3>
+             <button type="button" onclick="processRequest('most_collaborative_author')">En Çok İşbirliği Yapan Yazar</button>
         </form>
 
-        <!-- 7. En Uzun Yol -->
+
+        <!-- 7. En Uzun Yol Bulma -->
         <form method="POST">
-            <input type="hidden" name="action" value="longest_path">
             <h3>7. En Uzun Yol Bulma</h3>
-            <div class="input-group">
-                <label for="author_a_longest">Yazarın Adı:</label>
-                <input type="text" id="author_a_longest" name="author_a" required>
-            </div>
+            <label for="author_a_longest">Yazarın Adı:</label>
+            <input type="text" id="author_a_longest" name="author_a" required>
             <button type="submit">En Uzun Yolu Bul</button>
         </form>
     </div>
 
-<script src="{{ url_for('static', filename='js/script.js') }}">
-        // Grafiği görselleştirme işlemleri
-        var nodes = new vis.DataSet([]);
-        var edges = new vis.DataSet([]);
-        var container = document.getElementById('network');
-        var data = {
-            nodes: nodes,
-            edges: edges
-        };
-        var options = {};
-        var network = new vis.Network(container, data, options);
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var container = document.getElementById("network");
+
+            fetch("/get_graph_data")
+                .then(response => response.json())
+                .then(graphData => {
+                    var nodes = new vis.DataSet(graphData.nodes);
+                    var edges = new vis.DataSet(graphData.edges);
+
+                    var data = { nodes: nodes, edges: edges };
+                    var options = {
+                        nodes: { shape: "dot", scaling: { min: 10, max: 30 } },
+                        edges: { color: "#ccc" },
+                        physics: { solver: "forceAtlas2Based" }
+                    };
+                    new vis.Network(container, data, options);
+                })
+                .catch(error => console.error("Veri yüklenirken hata oluştu:", error));
+        });
     </script>
 </body>
 </html>
+f

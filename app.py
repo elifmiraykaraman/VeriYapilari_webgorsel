@@ -11,7 +11,7 @@ EXCEL_FILE_PATH = r"C:\Users\Acer\PycharmProjects\PROLAB_3\PROLAB 3 - GUNCEL DAT
 def create_graph(file_path):
     try:
         df = pd.read_excel(file_path)
-        df = df.iloc[:500]
+        df = df.iloc[:250]
     except Exception as e:
         raise ValueError(f"Excel dosyası okunamadı: {e}")
 
@@ -344,9 +344,30 @@ def home():
 
     return render_template('index.html') # GET isteği için render_template çağrısı
 
+@app.route('/process_request', methods=['POST'])
+def process_request():
+    data = request.get_json()
+    action = request.json.get('action')
+
+    try:
+        G, author_papers = create_graph(EXCEL_FILE_PATH)
+
+        if action == 'most_collaborative_author':
+            most_collaborative, num_collaborations = most_collaborative_author(G)
+            return jsonify({
+                'status': 'success',
+                'result': f"En Çok İşbirliği Yapan Yazar: {most_collaborative} ({num_collaborations} işbirliği)"
+            })
+
+        return jsonify({'status': 'error', 'result': 'Geçersiz işlem!'})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'result': str(e)})
+
+
 @app.route('/get', methods=['GET'])
 def home_get():
-   return render_template('index.html')
+    return render_template('index.html')
 
 @app.route('/get_graph_data', methods=['GET'])
 def get_graph_data():
@@ -356,9 +377,9 @@ def get_graph_data():
         return jsonify(json.loads(graph_json))
     except Exception as e:
         return jsonify({"error": f"Grafik verisi yüklenirken hata oluştu: {e}"})
-@app.route('/')
-def index():
-    return render_template('index.html')
+#@app.route('/')
+#def index():
+ #   return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
