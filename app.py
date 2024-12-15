@@ -11,7 +11,7 @@ EXCEL_FILE_PATH = r"C:\Users\Acer\PycharmProjects\PROLAB_3\PROLAB 3 - GUNCEL DAT
 def create_graph(file_path):
     try:
         df = pd.read_excel(file_path)
-        df = df.iloc[:250]
+        df = df.iloc[:450]
     except Exception as e:
         raise ValueError(f"Excel dosyası okunamadı: {e}")
 
@@ -46,6 +46,32 @@ def create_graph(file_path):
 
     return G, author_papers
 
+def graph_to_json(G, author_papers):
+    graph = nx.Graph()
+    for node, edges in G.items():
+        for neighbor, weight in edges.items():
+            graph.add_edge(node, neighbor, weight=weight)
+
+    nodes_data = []
+    for node in graph.nodes():
+        nodes_data.append({
+            'id': node,
+            'label': node,
+            'title': f"Yazar: {node}<br>Makaleler: {', '.join(author_papers.get(node, []))}",
+            'size': 10,
+            'color': "lightblue"
+        })
+
+    edges_data = []
+    for u, v, data in graph.edges(data=True):
+        edges_data.append({
+            'from': u,
+            'to': v,
+            'value': data['weight']
+        })
+
+    return json.dumps({'nodes': nodes_data, 'edges': edges_data})
+
 def dijkstra_algorithm(G, start, end=None):
     try:
         if end:
@@ -70,45 +96,6 @@ def most_collaborative_author(G):
             max_collaborations = num_collaborations
 
     return most_collaborative, max_collaborations
-
-def graph_to_json(G, author_papers, author_article_count, threshold):
-    graph = nx.Graph()
-    for node, edges in G.items():
-        for neighbor, weight in edges.items():
-            graph.add_edge(node, neighbor, weight=weight)
-
-    nodes_data = []
-    for node in graph.nodes():
-        size = 10
-        color = "lightgray"
-        if node in author_article_count:
-            article_count = author_article_count[node]
-            if article_count > threshold:
-                size = 20
-                color = "darkblue"
-            else:
-                size = 10
-                color = "lightblue"
-        nodes_data.append({
-            'id': node,
-            'label': node,
-            'title': f"Yazar: {node}<br>Makaleler: {', '.join(author_papers.get(node, []))}",
-            'size': size,
-            'color': color,
-        })
-
-    edges_data = []
-    seen = set()
-    for u, v, data in graph.edges(data=True):
-        if (u, v) not in seen and (v, u) not in seen:
-            edges_data.append({
-                'from': u,
-                'to': v,
-                'value': data['weight']
-            })
-            seen.add((u, v))
-
-    return json.dumps({'nodes': nodes_data, 'edges': edges_data})
 
 def find_longest_path(G, start):
     visited = set()
@@ -333,9 +320,21 @@ def home():
 
     return render_template('index.html') # GET isteği için render_template çağrısı
 
-    @app.route('/get', methods=['GET'])
-    def home_get():
-        return render_template('index.html')
+@app.route('/get', methods=['GET'])
+def home_get():
+   return render_template('index.html')
 
-    if __name__ == '__main__':
-        app.run(debug=True)
+@app.route('/get_graph_data', methods=['GET'])
+def get_graph_data():
+    try:
+        G, author_papers = create_graph(EXCEL_FILE_PATH)
+        graph_json = graph_to_json(G, author_papers)
+        return jsonify(json.loads(graph_json))
+    except Exception as e:
+        return jsonify({"error": f"Grafik verisi yüklenirken hata oluştu: {e}"})
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)

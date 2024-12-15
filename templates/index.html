@@ -12,7 +12,7 @@
         <h2>ÇIKTI EKRANI</h2>
     </div>
 
-    <div id="network">
+<div id="network" style="width: 100%; height: 500px; border: 1px solid lightgray;">
         <!-- Grafik Görselleştirme Alanı -->
         <img src="static/images/placeholder-graph.png" alt="Görselleştirme Alanı" style="width:100%; height:100%;">
     </div>
@@ -102,7 +102,7 @@
         </form>
     </div>
 
-    <script type="text/javascript">
+<script src="{{ url_for('static', filename='js/script.js') }}">
         // Grafiği görselleştirme işlemleri
         var nodes = new vis.DataSet([]);
         var edges = new vis.DataSet([]);
