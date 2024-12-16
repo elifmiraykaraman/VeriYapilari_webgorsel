@@ -11,7 +11,7 @@ EXCEL_FILE_PATH = r"C:\Users\Acer\PycharmProjects\PROLAB_3\PROLAB 3 - GUNCEL DAT
 def create_graph(file_path):
     try:
         df = pd.read_excel(file_path)
-        df = df.iloc[:250]
+        df = df.iloc[:500]
     except Exception as e:
         raise ValueError(f"Excel dosyası okunamadı: {e}")
 
@@ -348,23 +348,75 @@ def home():
 def process_request():
     data = request.get_json()
     action = request.json.get('action')
-
+    author_a = data.get('author_a', '').strip()
+    author_b = data.get('author_b', '').strip()
     try:
         G, author_papers = create_graph(EXCEL_FILE_PATH)
 
-        if action == 'most_collaborative_author':
+        # 1. En kısa yol bulma
+        if action == 'shortest_path':
+            if not author_a or not author_b:
+                raise ValueError("Her iki yazarın adı girilmelidir!")
+            path, length = dijkstra_algorithm(G, author_a, author_b)
+
+            # NetworkX Dijkstra Algoritması
+            if nx.has_path(G, author_a, author_b):
+                path = nx.shortest_path(G, source=author_a, target=author_b, weight='weight')
+                length = nx.shortest_path_length(G, source=author_a, target=author_b, weight='weight')
+                return jsonify({'status': 'success',
+                                'result': f"En kısa yol: {' → '.join(path)} (Toplam Uzunluk: {length})"})
+            else:
+                raise ValueError("Belirtilen iki yazar arasında bağlantı yoktur!")
+
+        # 2. Priority Queue oluşturma
+        elif action == 'priority_queue':
+            if not author_a:
+                raise ValueError("Yazar adı girilmelidir!")
+            collaborators = G.get(author_a, {})
+            sorted_queue = sorted(collaborators.items(), key=lambda x: x[1], reverse=True)
+            queue_text = "\n".join([f"{co_author}: {weight}" for co_author, weight in sorted_queue])
+            return jsonify({'status': 'success', 'result': f"Priority Queue:\n{queue_text}"})
+
+        # 3. BST oluşturma
+        elif action == 'create_bst':
+            if not author_a:
+                raise ValueError("Yazar adı girilmelidir!")
+            collaborators = G.get(author_a, {})
+            bst_nodes = sorted(collaborators.keys())
+            return jsonify({'status': 'success', 'result': f"BST Düğümleri: {', '.join(bst_nodes)}"})
+
+        # 4. Tüm kısa yolları hesaplama
+        elif action == 'shortest_paths_all':
+            if not author_a:
+                raise ValueError("Yazar adı girilmelidir!")
+            paths = nx.single_source_dijkstra_path(G, source=author_a, weight='weight')
+            result_text = "\n".join([f"{node}: {' → '.join(path)}" for node, path in paths.items()])
+            return jsonify({'status': 'success', 'result': f"Tüm Kısa Yollar:\n{result_text}"})
+
+        # 5. İşbirliği yaptığı yazar sayısı
+        elif action == 'count_collaborators':
+            if not author_a:
+                raise ValueError("Yazar adı girilmelidir!")
+            total = len(G.get(author_a, {}))
+            return jsonify({'status': 'success', 'result': f"{author_a} toplam {total} yazarla işbirliği yapmıştır."})
+
+        # 6. En çok işbirliği yapan yazar
+        elif action == 'most_collaborative_author':
             most_collaborative, num_collaborations = most_collaborative_author(G)
-            return jsonify({
-                'status': 'success',
-                'result': f"En Çok İşbirliği Yapan Yazar: {most_collaborative} ({num_collaborations} işbirliği)"
-            })
+            return jsonify({'status': 'success',
+                            'result': f"En Çok İşbirliği Yapan Yazar: {most_collaborative} ({num_collaborations} işbirliği)"})
+
+        # 7. En uzun yol bulma
+        elif action == 'longest_path':
+            if not author_a:
+                raise ValueError("Yazar adı girilmelidir!")
+            longest_path = find_longest_path(G, author_a)
+            return jsonify({'status': 'success', 'result': f"En Uzun Yol: {' → '.join(longest_path)}"})
 
         return jsonify({'status': 'error', 'result': 'Geçersiz işlem!'})
 
-    except Exception as e:
-        return jsonify({'status': 'error', 'result': str(e)})
-
-
+    except Exception as e:  # Bu satır düzeltilmiştir
+       return jsonify({'status': 'error', 'result': str(e)})
 @app.route('/get', methods=['GET'])
 def home_get():
     return render_template('index.html')

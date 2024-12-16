@@ -61,24 +61,31 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function processRequest(action) {
+    const authorA = document.getElementById("author_a")?.value || "";
+    const authorB = document.getElementById("author_b")?.value || "";
+
     fetch('/process_request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: action })
+        body: JSON.stringify({ action: action, author_a: authorA, author_b: authorB })
     })
     .then(response => response.json())
     .then(data => {
+        const outputTitle = document.getElementById('output-title');
+        const outputContent = document.getElementById('output-content');
+
+        outputTitle.style.display = "none"; // ÇIKTI EKRANI başlığını kaldır
         if (data.status === 'success') {
-            document.getElementById('output-content').innerHTML = data.result;
+            outputContent.innerHTML = `<pre>${data.result}</pre>`;
         } else {
-            document.getElementById('output-content').innerHTML = "Hata: " + data.result;
+            outputContent.innerHTML = `<pre style="color:red;">Hata: ${data.result}</pre>`;
         }
     })
     .catch(error => {
-        console.error('Hata:', error);
-        document.getElementById('output-content').innerHTML = "Sunucu hatası!";
+        document.getElementById('output-content').innerHTML = `<pre style="color:red;">Sunucu hatası!</pre>`;
     });
 }
+
 
 
     // Sağdaki butonlara olay dinleyicileri ekleme

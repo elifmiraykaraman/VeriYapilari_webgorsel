@@ -4,94 +4,29 @@
     <meta charset="UTF-8">
     <title>Yazar İşbirliği Ağı</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
-    <link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" />
     <style>
-
-        /* Genel reset ve taşmayı engelle */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box; /* Kenar kutuları dahil */
-}
-
-        /* Genel Sayfa Stili */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            display: flex;
-            font-family: Arial, sans-serif;
-            overflow: hidden; /* Sayfanın taşmasını engelle */
-        }
-
-        /* Ana yapı */
-    body {
-        display: flex;
-        flex-direction: row; /* Sol - Orta - Sağ düzen */
-        font-family: Arial, sans-serif;
-        }
-
-        /* Sol Çıktı Ekranı */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { height: 100%; display: flex; font-family: Arial, sans-serif; overflow: hidden; }
         #output {
-            width: 20%;
-            background-color: #f9f9f9;
-            border-right: 1px solid #ccc;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            flex-direction: column;
+            width: 20%; background-color: #f9f9f9; border-right: 1px solid #ccc;
+            display: flex; flex-direction: column; padding: 10px;
+            overflow-y: auto; /* ÇIKTI EKRANI kaydırma */
         }
-
-        /* Orta Grafik Alanı */
-        #network {
-            flex: 1;
-            height: 100vh;
-            box-sizing: border-box;
-            border: 1px solid lightgray;
-            overflow: hidden; /* Taşmayı önle */
-        }
-
-        /* Sağ Tarafa Sabit "İsterler" Alanı */
+        #network { flex: 1; height: 100vh; border: 1px solid lightgray; }
         #controls {
-            width: 20%;
-            position: fixed;
-            top: 0;
-            right: 0;
-            height: 100vh;
-            overflow-y: auto; /* Uzun içerik için kaydırma */
-            background-color: #f9f9f9;
-            border-left: 1px solid #ccc;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            width: 20%; position: fixed; top: 0; right: 0; height: 100vh;
+            overflow-y: auto; background-color: #f9f9f9; border-left: 1px solid #ccc; padding: 10px;
+            display: flex; flex-direction: column; gap: 15px;
         }
-
-        /* Form Stili */
-        form {
-            background-color: #fff;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        /* Buton Stili */
+        h3 { margin-bottom: 10px; }
         button {
-            width: 100%;
-            margin-top: 5px;
-            padding: 8px;
-            font-weight: bold;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
+            width: 100%; padding: 8px; font-weight: bold; background-color: #4CAF50; color: white;
+            border: none; border-radius: 3px; cursor: pointer; margin-top: 5px;
         }
-
-        button:hover {
-            background-color: #45a049;
+        button:hover { background-color: #45a049; }
+        input {
+            width: 100%; padding: 5px; margin: 5px 0; border: 1px solid #ccc; border-radius: 3px;
         }
     </style>
 </head>
@@ -102,97 +37,84 @@
         <div id="output-content">Sonuçlar burada gösterilecek.</div>
     </div>
 
-
     <!-- Orta Grafik Alanı -->
     <div id="network"></div>
 
-    <!-- Sağ Tarafa Sabit "İsterler" Alanı -->
+    <!-- Sağ Kontrol Paneli -->
     <div id="controls">
         <h2>İsterler</h2>
+        <h3>1. En Kısa Yol Bulma</h3>
+        <input type="text" id="author_a" placeholder="A Yazar Adı">
+        <input type="text" id="author_b" placeholder="B Yazar Adı">
+        <button onclick="processRequest('shortest_path', 'author_a', 'author_b')">En Kısa Yolu Bul</button>
 
-        <!-- 1. En Kısa Yol Bulma -->
-        <form method="POST">
-            <h3>1. En Kısa Yol Bulma</h3>
-            <label for="author_a">A Yazarının Adı:</label>
-            <input type="text" id="author_a" name="author_a" required>
-            <label for="author_b">B Yazarının Adı:</label>
-            <input type="text" id="author_b" name="author_b" required>
-            <button type="submit">En Kısa Yolu Bul</button>
-        </form>
+        <h3>2. Queue Oluştur</h3>
+        <input type="text" id="author_queue" placeholder="A Yazar Adı">
+        <button onclick="processRequest('priority_queue', 'author_queue')">Queue'yu Oluştur</button>
 
-        <!-- 2. Priority Queue Oluşturma -->
-        <form method="POST">
-            <h3>2. Priority Queue Oluşturma</h3>
-            <label for="author_a_pq">A Yazarının Adı:</label>
-            <input type="text" id="author_a_pq" name="author_a" required>
-            <button type="submit">Queue'yu Oluştur</button>
-        </form>
+        <h3>3. BST Oluştur</h3>
+        <input type="text" id="author_bst" placeholder="A Yazar Adı">
+        <button onclick="processRequest('create_bst', 'author_bst')">BST'yi Oluştur</button>
 
-        <!-- 3. BST Oluşturma -->
-        <form method="POST">
-            <h3>3. BST Oluşturma</h3>
-            <label for="author_a_bst">A Yazarının Adı:</label>
-            <input type="text" id="author_a_bst" name="author_a" required>
-            <label for="remove_author">BST'den Çıkarılacak Yazar:</label>
-            <input type="text" id="remove_author" name="remove_author">
-            <button type="submit">BST'yi Güncelle</button>
-        </form>
+        <h3>4. Kısa Yollar Hesapla</h3>
+        <input type="text" id="author_shortest_all" placeholder="A Yazar Adı">
+        <button onclick="processRequest('shortest_paths_all', 'author_shortest_all')">Kısa Yolları Hesapla</button>
 
-        <!-- 4. Kısa Yollar Hesaplama -->
-        <form method="POST">
-            <h3>4. A Yazarı ve İşbirlikçi Yazarlar Arasında Kısa Yollar</h3>
-            <label for="author_a_collab">A Yazarının Adı:</label>
-            <input type="text" id="author_a_collab" name="author_a" required>
-            <button type="submit">Kısa Yolları Hesapla</button>
-        </form>
+        <h3>5. Yazar Sayısını Hesapla</h3>
+        <input type="text" id="author_count" placeholder="A Yazar Adı">
+        <button onclick="processRequest('count_collaborators', 'author_count')">Yazar Sayısını Hesapla</button>
 
-        <!-- 5. Yazar Sayısı Hesaplama -->
-        <form method="POST">
-            <h3>5. A Yazarının İşbirliği Yaptığı Yazar Sayısı</h3>
-            <label for="author_a_count">A Yazarının Adı:</label>
-            <input type="text" id="author_a_count" name="author_a" required>
-            <button type="submit">Yazar Sayısını Hesapla</button>
-        </form>
+        <h3>6. En Çok İşbirliği Yapan Yazar</h3>
+        <button onclick="processRequest('most_collaborative_author')">En Çok İşbirliği Yapan Yazar</button>
 
-       <!-- 6. En Çok İşbirliği Yapan Yazar -->
-        <form id="most-collaborative-form">
-             <h3>6. En Çok İşbirliği Yapan Yazar</h3>
-             <button type="button" onclick="processRequest('most_collaborative_author')">En Çok İşbirliği Yapan Yazar</button>
-        </form>
-
-
-        <!-- 7. En Uzun Yol Bulma -->
-        <form method="POST">
-            <h3>7. En Uzun Yol Bulma</h3>
-            <label for="author_a_longest">Yazarın Adı:</label>
-            <input type="text" id="author_a_longest" name="author_a" required>
-            <button type="submit">En Uzun Yolu Bul</button>
-        </form>
+        <h3>7. En Uzun Yol Bul</h3>
+        <input type="text" id="author_longest" placeholder="A Yazar Adı">
+        <button onclick="processRequest('longest_path', 'author_longest')">En Uzun Yolu Bul</button>
     </div>
-
 
     <!-- JavaScript -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var container = document.getElementById("network");
+        // Sunucuya istek gönderme fonksiyonu
+        function processRequest(action, inputId1, inputId2 = null) {
+            const input1 = document.getElementById(inputId1)?.value || '';
+            const input2 = inputId2 ? document.getElementById(inputId2)?.value || '' : '';
 
+            fetch('/process_request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action, author_a: input1, author_b: input2 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('output-content').innerHTML = data.status === 'success'
+                    ? `<b>${data.result}</b>`
+                    : `<b>Hata:</b> ${data.result}`;
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                document.getElementById('output-content').innerHTML = "Sunucu hatası!";
+            });
+        }
+
+        // Grafiği oluşturma
+        document.addEventListener("DOMContentLoaded", function () {
             fetch("/get_graph_data")
                 .then(response => response.json())
                 .then(graphData => {
-                    var nodes = new vis.DataSet(graphData.nodes);
-                    var edges = new vis.DataSet(graphData.edges);
+                    const container = document.getElementById("network");
+                    const nodes = new vis.DataSet(graphData.nodes);
+                    const edges = new vis.DataSet(graphData.edges);
 
-                    var data = { nodes: nodes, edges: edges };
-                    var options = {
+                    const options = {
                         nodes: { shape: "dot", scaling: { min: 10, max: 30 } },
-                        edges: { color: "#ccc" },
-                        physics: { solver: "forceAtlas2Based" }
+                        edges: { color: { color: "#848484", highlight: "#3c3c3c" } },
+                        physics: { enabled: true, solver: "forceAtlas2Based" },
+                        layout: { improvedLayout: true }
                     };
-                    new vis.Network(container, data, options);
+                    new vis.Network(container, { nodes, edges }, options);
                 })
-                .catch(error => console.error("Veri yüklenirken hata oluştu:", error));
+                .catch(error => console.error("Grafik verisi yüklenirken hata oluştu:", error));
         });
     </script>
 </body>
 </html>
-f
