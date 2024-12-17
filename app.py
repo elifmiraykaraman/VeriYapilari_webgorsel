@@ -3,6 +3,7 @@ import pandas as pd
 import networkx as nx
 import json
 import os
+
 app = Flask(__name__)
 
 # Excel dosyasının yolu
@@ -11,71 +12,76 @@ EXCEL_FILE_PATH = r"C:\Users\Acer\PycharmProjects\PROLAB_3\PROLAB 3 - GUNCEL DAT
 def create_graph(file_path):
     try:
         df = pd.read_excel(file_path)
-        df = df.iloc[:500]
+        df = df.iloc[:500]  # Gerekirse ilk 500 satırı kullanın
     except Exception as e:
         raise ValueError(f"Excel dosyası okunamadı: {e}")
 
-    G = {}
+    G = nx.Graph()
     author_papers = {}
 
     for _, row in df.iterrows():
-        main_author = row['author_name']
-        coauthors = [coauthor.strip() for coauthor in row['coauthors'].split(",") if coauthor.strip()]
-        paper_title = row['paper_title']
+        # Yazar isimlerini temizle
+        main_author = str(row['author_name']).strip().strip("'").strip('"').strip('[]')
+        coauthors = [
+            coauthor.strip().strip("'").strip('"').strip('[]')
+            for coauthor in str(row['coauthors']).split(",")
+            if coauthor.strip()
+        ]
 
+        paper_title = str(row['paper_title']).strip()
+
+        # Ana yazarın makale listesini güncelle
         if main_author not in author_papers:
             author_papers[main_author] = []
         author_papers[main_author].append(paper_title)
 
-        if main_author not in G:
-            G[main_author] = {}
+        # Ana yazar düğümü ekle
+        if not G.has_node(main_author):
+            G.add_node(main_author)
 
+        # Ortak yazarları ekle
         for co_author in coauthors:
-            if co_author not in G:
-                G[co_author] = {}
-            if co_author != main_author:
-                if co_author in G[main_author]:
-                    G[main_author][co_author] += 1
-                else:
-                    G[main_author][co_author] = 1
+            if co_author not in author_papers:
+                author_papers[co_author] = []
+            author_papers[co_author].append(paper_title)
 
-                if main_author in G[co_author]:
-                    G[co_author][main_author] += 1
-                else:
-                    G[co_author][main_author] = 1
+            if not G.has_node(co_author):
+                G.add_node(co_author)
+
+            # Kenar mevcutsa ağırlığı arttır, yoksa yeni ekle
+            if G.has_edge(main_author, co_author):
+                G[main_author][co_author]['weight'] += 1
+            else:
+                G.add_edge(main_author, co_author, weight=1)
 
     return G, author_papers
 
 def graph_to_json(G, author_papers):
-    graph = nx.Graph()
-    for node, edges in G.items():
-        for neighbor, weight in edges.items():
-            graph.add_edge(node, neighbor, weight=weight)
-
-        # Toplam kenar ağırlıklarını hesapla
+    # Toplam kenar ağırlıklarını hesapla
     total_weights = {}
     degrees = {}
-    for node in graph.nodes():
-        total_weight = sum(data['weight'] for _, _, data in graph.edges(node, data=True))
-        total_weights[node] = total_weight
-        degrees[node] = graph.degree(node)  # Düğüm bağlantı sayısı
 
-        # Ortalama kenar ağırlığını hesapla
+    for node in G.nodes():
+        total_weight = sum(data['weight'] for _, _, data in G.edges(node, data=True))
+        total_weights[node] = total_weight
+        degrees[node] = G.degree(node)
+
+    # Ortalama kenar ağırlığı
     total_sum = sum(total_weights.values())
     average_weight = total_sum / len(total_weights) if total_weights else 0
-    threshold = average_weight * 1.2  # %20 üzerinde olanlar için threshold
+    threshold = average_weight * 1.2
 
-    # Düğümleri JSON formatına ekle
+    # Düğümler JSON
     nodes_data = []
-    for node in graph.nodes():
+    for node in G.nodes():
         total_weight = total_weights.get(node, 0)
         degree = degrees.get(node, 0)
         if total_weight > threshold:
-            size = 20 + degree * 2  # Büyük düğümler için ekstra boyut (bağlantı sayısına göre artar)
-            color = "darkblue"  # Koyu renk
+            size = 20 + degree * 2
+            color = "darkblue"
         else:
-            size = 10 + degree * 1.5  # Küçük düğümler için boyut
-            color = "lightblue"  # Açık renk
+            size = 10 + degree * 1.5
+            color = "lightblue"
 
         nodes_data.append({
             'id': node,
@@ -85,9 +91,9 @@ def graph_to_json(G, author_papers):
             'color': color
         })
 
-    # Kenarları JSON formatına ekle
+    # Kenarlar JSON
     edges_data = []
-    for u, v, data in graph.edges(data=True):
+    for u, v, data in G.edges(data=True):
         edges_data.append({
             'from': u,
             'to': v,
@@ -103,9 +109,12 @@ def dijkstra_algorithm(G, start, end=None):
             length = nx.shortest_path_length(G, source=start, target=end, weight='weight')
             return path, length
         else:
-            path = nx.single_source_dijkstra_path(G, start)
-            length = nx.single_source_dijkstra_path_length(G, start)
-            return path, length
+            # Tüm düğümlere olan en kısa yollar
+            paths = nx.single_source_dijkstra_path(G, start, weight='weight')
+            lengths = nx.single_source_dijkstra_path_length(G, start, weight='weight')
+            return paths, lengths
+    except nx.NetworkXNoPath:
+        raise ValueError(f"Dijkstra algoritması uygulanamadı: '{start}' ve '{end}' arasında yol yok.")
     except Exception as e:
         raise ValueError(f"Dijkstra algoritması uygulanamadı: {e}")
 
@@ -113,8 +122,8 @@ def most_collaborative_author(G):
     most_collaborative = None
     max_collaborations = 0
 
-    for author, collaborators in G.items():
-        num_collaborations = len(collaborators)
+    for author in G.nodes():
+        num_collaborations = G.degree(author)
         if num_collaborations > max_collaborations:
             most_collaborative = author
             max_collaborations = num_collaborations
@@ -122,6 +131,9 @@ def most_collaborative_author(G):
     return most_collaborative, max_collaborations
 
 def find_longest_path(G, start):
+    # Bu DFS ile en uzun yolu bulma fonksiyonu, bağlı bir bileşende en uzun basit yolu bulmaya çalışır.
+    # Not: En uzun yol problemi NP-zordur, burada basit bir DFS yaklaşımı var,
+    # Tüm yollara bakar (küçük veri setlerinde çalışabilir ancak büyük setlerde yavaş olabilir).
     visited = set()
     longest_path = []
 
@@ -133,14 +145,15 @@ def find_longest_path(G, start):
         if len(path) > len(longest_path):
             longest_path = list(path)
 
-        for neighbor in G.get(node, {}):
+        for neighbor in G[node]:
             if neighbor not in visited:
                 dfs(neighbor, path)
 
         path.pop()
         visited.remove(node)
 
-    dfs(start, [])
+    if G.has_node(start):
+        dfs(start, [])
     return longest_path
 
 def calculate_author_statistics(df):
@@ -154,7 +167,7 @@ def home():
     graph_json = None
     path = None
     length = None
-    most_collaborative = None
+    most_col = None
     num_collaborations = None
     author_a = None
     author_b = None
@@ -186,8 +199,8 @@ def home():
             return render_template('index.html', error=error)
 
         if action == 'shortest_path':
-            author_a = request.form.get('author_a')
-            author_b = request.form.get('author_b')
+            author_a = request.form.get('author_a', '').strip()
+            author_b = request.form.get('author_b', '').strip()
 
             if not author_a or not author_b:
                 error = "Lütfen her iki yazar adını da girin."
@@ -201,33 +214,40 @@ def home():
                 return render_template('index.html', error=error)
 
         elif action == 'priority_queue':
-            author_a = request.form.get('author_a')
+            author_a = request.form.get('author_a', '').strip()
 
             if not author_a:
                 error = "Lütfen yazar adını girin."
                 return render_template('index.html', error=error)
 
-            collaborators = G.get(author_a, {})
-            queue = sorted(collaborators.items(), key=lambda x: x[1], reverse=True)
+            if not G.has_node(author_a):
+                error = f"{author_a} graf içerisinde bulunamadı."
+                return render_template('index.html', error=error)
+
+            # Priority Queue: komşuları ağırlıklarına göre sırala
+            collaborators = G[author_a]
+            queue = sorted(collaborators.items(), key=lambda x: x[1]['weight'], reverse=True)
 
         elif action == 'create_bst':
-            author_a = request.form.get('author_a')
+            author_a = request.form.get('author_a', '').strip()
             if not author_a:
                 error = "Lütfen yazar adını girin."
                 return render_template('index.html', error=error)
 
-            collaborators = G.get(author_a, {})
-            queue = sorted(collaborators.items(), key=lambda x: x[1], reverse=True)
-            bst_root = None
+            if not G.has_node(author_a):
+                error = f"{author_a} graf içerisinde bulunamadı."
+                return render_template('index.html', error=error)
 
-            # Basit bir ikili arama ağacı (BST) sınıfı
+            # BST oluşturmak için düğümleri sırala
+            collaborators = G[author_a]
+            sorted_authors = sorted(collaborators.keys())
+
             class BSTNode:
                 def __init__(self, key):
                     self.left = None
                     self.right = None
                     self.value = key
 
-            # BST'ye yazar ekleme fonksiyonu
             def insert_bst(root, key):
                 if root is None:
                     return BSTNode(key)
@@ -238,7 +258,12 @@ def home():
                         root.right = insert_bst(root.right, key)
                 return root
 
-            # BST'den yazar çıkarma fonksiyonu
+            def find_min(root):
+                current = root
+                while current.left is not None:
+                    current = current.left
+                return current
+
             def remove_bst(root, key):
                 if root is None:
                     return root
@@ -260,23 +285,14 @@ def home():
                     root.right = remove_bst(root.right, temp.value)
                 return root
 
-            # BST'de minimum değeri bulma fonksiyonu
-            def find_min(root):
-                current = root
-                while current.left is not None:
-                    current = current.left
-                return current
-
-            # BST oluşturma
-            for author, _ in queue:
+            bst_root = None
+            for author in sorted_authors:
                 bst_root = insert_bst(bst_root, author)
 
-            # Kullanıcıdan çıkarılacak yazarı al
-            remove_author = request.form.get('remove_author')
+            remove_author = request.form.get('remove_author', '').strip()
             if remove_author:
                 bst_root = remove_bst(bst_root, remove_author)
 
-            # BST'yi liste olarak almak için in-order traversal
             def inorder_traversal(root, result=None):
                 if result is None:
                     result = []
@@ -289,10 +305,14 @@ def home():
             bst = inorder_traversal(bst_root)
 
         elif action == 'shortest_paths_all':
-            author_a = request.form.get('author_a')
+            author_a = request.form.get('author_a', '').strip()
 
             if not author_a:
                 error = "Lütfen yazar adını girin."
+                return render_template('index.html', error=error)
+
+            if not G.has_node(author_a):
+                error = f"{author_a} graf içerisinde bulunamadı."
                 return render_template('index.html', error=error)
 
             try:
@@ -303,27 +323,35 @@ def home():
                 return render_template('index.html', error=error)
 
         elif action == 'count_collaborators':
-            author_a = request.form.get('author_a')
+            author_a = request.form.get('author_a', '').strip()
 
             if not author_a:
                 error = "Lütfen yazar adını girin."
                 return render_template('index.html', error=error)
 
-            total_collaborations = len(G.get(author_a, {}))
+            if not G.has_node(author_a):
+                error = f"{author_a} graf içerisinde bulunamadı."
+                return render_template('index.html', error=error)
+
+            total_collaborations = G.degree(author_a)
 
         elif action == 'most_collaborative':
-            most_collaborative, num_collaborations = most_collaborative_author(G)
+            most_col, num_collaborations = most_collaborative_author(G)
 
         elif action == 'longest_path':
-            author_a = request.form.get('author_a')
+            author_a = request.form.get('author_a', '').strip()
 
             if not author_a:
                 error = "Lütfen yazar adını girin."
+                return render_template('index.html', error=error)
+
+            if not G.has_node(author_a):
+                error = f"{author_a} graf içerisinde bulunamadı."
                 return render_template('index.html', error=error)
 
             longest_path = find_longest_path(G, author_a)
 
-        # Grafik verisini JSON formatına dönüştürme
+        # Grafik verisini JSON formatına dönüştür
         if action in ['shortest_path', 'shortest_paths_all', 'priority_queue', 'create_bst']:
             graph_json = graph_to_json(G, author_papers)
 
@@ -331,7 +359,7 @@ def home():
                                graph_data=graph_json,
                                path=path,
                                length=length,
-                               most_collaborative=most_collaborative,
+                               most_collaborative=most_col,
                                num_collaborations=num_collaborations,
                                author_a=author_a,
                                author_b=author_b,
@@ -342,81 +370,100 @@ def home():
                                paths=paths,
                                error=error)
 
-    return render_template('index.html') # GET isteği için render_template çağrısı
+    return render_template('index.html')  # GET isteği için
 
 @app.route('/process_request', methods=['POST'])
 def process_request():
     data = request.get_json()
-    action = request.json.get('action')
+    action = data.get('action')
     author_a = data.get('author_a', '').strip()
     author_b = data.get('author_b', '').strip()
     try:
         G, author_papers = create_graph(EXCEL_FILE_PATH)
 
-        # 1. En kısa yol bulma
         if action == 'shortest_path':
             if not author_a or not author_b:
                 raise ValueError("Her iki yazarın adı girilmelidir!")
             path, length = dijkstra_algorithm(G, author_a, author_b)
+            return jsonify({
+                'status': 'success',
+                'result': f"En kısa yol: {' → '.join(path)} (Uzunluk: {length})",
+                'highlight_nodes': path
+            })
 
-            # NetworkX Dijkstra Algoritması
-            if nx.has_path(G, author_a, author_b):
-                path = nx.shortest_path(G, source=author_a, target=author_b, weight='weight')
-                length = nx.shortest_path_length(G, source=author_a, target=author_b, weight='weight')
-                return jsonify({'status': 'success',
-                                'result': f"En kısa yol: {' → '.join(path)} (Toplam Uzunluk: {length})"})
-            else:
-                raise ValueError("Belirtilen iki yazar arasında bağlantı yoktur!")
-
-        # 2. Priority Queue oluşturma
         elif action == 'priority_queue':
             if not author_a:
                 raise ValueError("Yazar adı girilmelidir!")
-            collaborators = G.get(author_a, {})
-            sorted_queue = sorted(collaborators.items(), key=lambda x: x[1], reverse=True)
-            queue_text = "\n".join([f"{co_author}: {weight}" for co_author, weight in sorted_queue])
-            return jsonify({'status': 'success', 'result': f"Priority Queue:\n{queue_text}"})
+            if not G.has_node(author_a):
+                raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
+            collaborators = G[author_a]
+            sorted_queue = sorted(collaborators.items(), key=lambda x: x[1]['weight'], reverse=True)
+            queue_nodes = [author_a] + [node for node, _ in sorted_queue]
+            queue_text = "\n".join([f"{co_author}: {data['weight']}" for co_author, data in sorted_queue])
+            return jsonify({
+                'status': 'success',
+                'result': f"Priority Queue:\n{queue_text}",
+                'highlight_nodes': queue_nodes
+            })
 
-        # 3. BST oluşturma
         elif action == 'create_bst':
             if not author_a:
                 raise ValueError("Yazar adı girilmelidir!")
-            collaborators = G.get(author_a, {})
-            bst_nodes = sorted(collaborators.keys())
-            return jsonify({'status': 'success', 'result': f"BST Düğümleri: {', '.join(bst_nodes)}"})
+            if not G.has_node(author_a):
+                raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
 
-        # 4. Tüm kısa yolları hesaplama
+            collaborators = G[author_a]
+            bst_nodes = sorted(collaborators.keys())
+            return jsonify({
+                'status': 'success',
+                'result': f"BST Oluşturulan Düğümler: {', '.join(bst_nodes)}",
+                'highlight_nodes': bst_nodes
+            })
+
         elif action == 'shortest_paths_all':
             if not author_a:
                 raise ValueError("Yazar adı girilmelidir!")
-            paths = nx.single_source_dijkstra_path(G, source=author_a, weight='weight')
-            result_text = "\n".join([f"{node}: {' → '.join(path)}" for node, path in paths.items()])
-            return jsonify({'status': 'success', 'result': f"Tüm Kısa Yollar:\n{result_text}"})
+            if not G.has_node(author_a):
+                raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
+            paths, lengths = dijkstra_algorithm(G, author_a)
+            result_text = "<br>".join([f"{k}: {' → '.join(v)}" for k, v in paths.items()])
+            highlight_nodes = [author_a] + list(paths.keys())
+            return jsonify({
+                'status': 'success',
+                'result': f"<b>Tüm Kısa Yollar:</b><br>{result_text}",
+                'highlight_nodes': highlight_nodes
+            })
 
-        # 5. İşbirliği yaptığı yazar sayısı
         elif action == 'count_collaborators':
             if not author_a:
                 raise ValueError("Yazar adı girilmelidir!")
-            total = len(G.get(author_a, {}))
+            if not G.has_node(author_a):
+                raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
+            total = G.degree(author_a)
             return jsonify({'status': 'success', 'result': f"{author_a} toplam {total} yazarla işbirliği yapmıştır."})
 
-        # 6. En çok işbirliği yapan yazar
         elif action == 'most_collaborative_author':
-            most_collaborative, num_collaborations = most_collaborative_author(G)
+            most_col, num_collaborations = most_collaborative_author(G)
             return jsonify({'status': 'success',
-                            'result': f"En Çok İşbirliği Yapan Yazar: {most_collaborative} ({num_collaborations} işbirliği)"})
+                            'result': f"En Çok İşbirliği Yapan Yazar: {most_col} ({num_collaborations} işbirliği)"})
 
-        # 7. En uzun yol bulma
         elif action == 'longest_path':
             if not author_a:
                 raise ValueError("Yazar adı girilmelidir!")
+            if not G.has_node(author_a):
+                raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
             longest_path = find_longest_path(G, author_a)
-            return jsonify({'status': 'success', 'result': f"En Uzun Yol: {' → '.join(longest_path)}"})
+            return jsonify({
+                'status': 'success',
+                'result': f"En Uzun Yol: {' → '.join(longest_path)}",
+                'highlight_nodes': longest_path
+            })
 
         return jsonify({'status': 'error', 'result': 'Geçersiz işlem!'})
 
-    except Exception as e:  # Bu satır düzeltilmiştir
-       return jsonify({'status': 'error', 'result': str(e)})
+    except Exception as e:
+        return jsonify({'status': 'error', 'result': str(e)})
+
 @app.route('/get', methods=['GET'])
 def home_get():
     return render_template('index.html')
@@ -429,9 +476,7 @@ def get_graph_data():
         return jsonify(json.loads(graph_json))
     except Exception as e:
         return jsonify({"error": f"Grafik verisi yüklenirken hata oluştu: {e}"})
-#@app.route('/')
-#def index():
- #   return render_template('index.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

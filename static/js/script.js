@@ -71,14 +71,13 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then(response => response.json())
     .then(data => {
-        const outputTitle = document.getElementById('output-title');
         const outputContent = document.getElementById('output-content');
+        outputContent.innerHTML = data.status === 'success'
+            ? `<b>${data.result.replace(/\n/g, '<br>')}</b>`
+            : `<b>Hata:</b> ${data.result}`;
 
-        outputTitle.style.display = "none"; // ÇIKTI EKRANI başlığını kaldır
-        if (data.status === 'success') {
-            outputContent.innerHTML = `<pre>${data.result}</pre>`;
-        } else {
-            outputContent.innerHTML = `<pre style="color:red;">Hata: ${data.result}</pre>`;
+        if (data.highlight_nodes) {
+            updateGraphWithHighlights(data.highlight_nodes);
         }
     })
     .catch(error => {
@@ -87,6 +86,24 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
+function updateGraphWithHighlights(highlightNodes) {
+    fetch("/get_graph_data")
+        .then(response => response.json())
+        .then(graphData => {
+            const nodes = new vis.DataSet(graphData.nodes.map(node => {
+                if (highlightNodes.includes(node.id)) {
+                    node.color = {background: 'red', border: 'darkred'}; // Kırmızı renk
+                } else {
+                    node.color = {background: 'blue', border: 'darkblue'}; // Normal renk
+                }
+                return node;
+            }));
+            const edges = new vis.DataSet(graphData.edges);
+
+            const container = document.getElementById("network");
+            new vis.Network(container, {nodes, edges}, {});
+        });
+}
 
     // Sağdaki butonlara olay dinleyicileri ekleme
     function setupButtons() {
@@ -98,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 fetch("/", {
                     method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
                     body: `action=${action}&author_a=${authorA}&author_b=${authorB}`
                 })
                     .then(response => response.text())

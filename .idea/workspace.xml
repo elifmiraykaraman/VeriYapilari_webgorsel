@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="sayfa düzenlemesi yapıldı.">
+    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="1 ve  4. ister açlışmıyor. 5, 6 ve 7 . isterler test edilidi doğru çalışıyor. 2 ve 3 denenmedi.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -126,7 +125,8 @@
       <workItem from="1734267444259" duration="11676000" />
       <workItem from="1734290202172" duration="123000" />
       <workItem from="1734341102003" duration="4446000" />
-      <workItem from="1734345854574" duration="3281000" />
+      <workItem from="1734345854574" duration="4380000" />
+      <workItem from="1734424357954" duration="9706000" />
     </task>
     <task id="LOCAL-00001" summary="istenilen sayfa düzenine ulaşıldı">
       <option name="closed" value="true" />
@@ -168,7 +168,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734287176703</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="1 ve  4. ister açlışmıyor. 5, 6 ve 7 . isterler test edilidi doğru çalışıyor. 2 ve 3 denenmedi.">
+      <option name="closed" value="true" />
+      <created>1734351586328</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1734351586328</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -180,7 +188,8 @@
     <MESSAGE value="düğümler sayfanın ortasına geldi." />
     <MESSAGE value="düğümlerin büyüklükleri ve renkleri isterlere göre güncellendi." />
     <MESSAGE value="sayfa düzenlemesi yapıldı." />
-    <option name="LAST_COMMIT_MESSAGE" value="sayfa düzenlemesi yapıldı." />
+    <MESSAGE value="1 ve  4. ister açlışmıyor. 5, 6 ve 7 . isterler test edilidi doğru çalışıyor. 2 ve 3 denenmedi." />
+    <option name="LAST_COMMIT_MESSAGE" value="1 ve  4. ister açlışmıyor. 5, 6 ve 7 . isterler test edilidi doğru çalışıyor. 2 ve 3 denenmedi." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PROLAB_3$PROLAB_3.coverage" NAME="PROLAB_3 Coverage Results" MODIFIED="1734261960929" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
