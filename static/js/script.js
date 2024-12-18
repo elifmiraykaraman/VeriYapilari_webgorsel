@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // HTML elementlerini seçiyoruz
     const container = document.getElementById("network");
     const outputContent = document.getElementById("output-content");
+
+    let network, nodes, edges; // Global değişkenler
 
     // Ekran boyutu değiştiğinde grafiği otomatik boyutlandırmak için fonksiyon
     function resizeNetwork(network) {
@@ -22,11 +23,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Grafiği oluşturma fonksiyonu
     function createNetwork(graphData) {
-        const nodes = new vis.DataSet(graphData.nodes);
-        const edges = new vis.DataSet(graphData.edges);
+        nodes = new vis.DataSet(graphData.nodes);
+        edges = new vis.DataSet(graphData.edges);
 
         const data = { nodes: nodes, edges: edges };
-
         const options = {
             nodes: {
                 shape: "dot",
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
             layout: { improvedLayout: true }
         };
 
-        const network = new vis.Network(container, data, options);
+        network = new vis.Network(container, data, options);
         resizeNetwork(network);
 
         // Düğüm üzerine tıklandığında bilgi göster
@@ -60,74 +60,47 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Sunucudan veri al ve grafiği güncelle
     function processRequest(action) {
-    const authorA = document.getElementById("author_a")?.value || "";
-    const authorB = document.getElementById("author_b")?.value || "";
+        const authorA = document.getElementById("author_a")?.value || "";
+        const authorB = document.getElementById("author_b")?.value || "";
 
-    fetch('/process_request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: action, author_a: authorA, author_b: authorB })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const outputContent = document.getElementById('output-content');
-        outputContent.innerHTML = data.status === 'success'
-            ? `<b>${data.result.replace(/\n/g, '<br>')}</b>`
-            : `<b>Hata:</b> ${data.result}`;
-
-        if (data.highlight_nodes) {
-            updateGraphWithHighlights(data.highlight_nodes);
-        }
-    })
-    .catch(error => {
-        document.getElementById('output-content').innerHTML = `<pre style="color:red;">Sunucu hatası!</pre>`;
-    });
-}
-
-
-function updateGraphWithHighlights(highlightNodes) {
-    fetch("/get_graph_data")
+        fetch('/process_request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action, author_a: authorA, author_b: authorB })
+        })
         .then(response => response.json())
-        .then(graphData => {
-            const nodes = new vis.DataSet(graphData.nodes.map(node => {
-                if (highlightNodes.includes(node.id)) {
-                    node.color = {background: 'red', border: 'darkred'}; // Kırmızı renk
-                } else {
-                    node.color = {background: 'blue', border: 'darkblue'}; // Normal renk
-                }
-                return node;
-            }));
-            const edges = new vis.DataSet(graphData.edges);
+        .then(data => {
+            // Çıktı ekranını güncelle
+            outputContent.innerHTML = data.status === 'success'
+                ? `<b>${data.result}</b>`
+                : `<b style="color:red;">Hata:</b> ${data.result}`;
 
-            const container = document.getElementById("network");
-            new vis.Network(container, {nodes, edges}, {});
+            // Eğer vurgulanacak düğüm varsa
+            if (data.highlight_nodes) {
+                highlightNodesWithAnimation(data.highlight_nodes);
+            }
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            outputContent.innerHTML = `<pre style="color:red;">Sunucu hatası!</pre>`;
         });
-}
+    }
 
-    // Sağdaki butonlara olay dinleyicileri ekleme
-    function setupButtons() {
-        document.querySelectorAll("button").forEach(button => {
-            button.addEventListener("click", () => {
-                const action = button.getAttribute("data-action");
-                const authorA = document.getElementById("author_a")?.value || "";
-                const authorB = document.getElementById("author_b")?.value || "";
+    // Belirtilen düğümleri kırmızıya çevirip 2 saniye sonra eski haline döndüren fonksiyon
+    function highlightNodesWithAnimation(highlightNodes) {
+        // Düğümleri kırmızıya çevir
+        highlightNodes.forEach(nodeId => {
+            nodes.update({ id: nodeId, color: { background: 'red', border: 'darkred' } });
+        });
 
-                fetch("/", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                    body: `action=${action}&author_a=${authorA}&author_b=${authorB}`
-                })
-                    .then(response => response.text())
-                    .then(data => {
-                        // Çıktı ekranını güncelle
-                        outputContent.innerHTML = `<pre>${data}</pre>`;
-                    })
-                    .catch(error => {
-                        outputContent.innerHTML = `<pre>Hata: ${error}</pre>`;
-                    });
+        // 2 saniye sonra düğümleri eski haline getir
+        setTimeout(() => {
+            highlightNodes.forEach(nodeId => {
+                nodes.update({ id: nodeId, color: { background: 'blue', border: 'darkblue' } });
             });
-        });
+        }, 2000);
     }
 
     // Sayfa yüklendiğinde yapılacak işlemler
@@ -140,4 +113,14 @@ function updateGraphWithHighlights(highlightNodes) {
             console.error("Grafik verisi yüklenirken hata oluştu:", error);
             alert("Grafik verisi yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
         });
+
+    // Butonlara olay dinleyicisi ekleme
+    function setupButtons() {
+        document.querySelectorAll("button").forEach(button => {
+            button.addEventListener("click", () => {
+                const action = button.getAttribute("data-action");
+                processRequest(action);
+            });
+        });
+    }
 });
