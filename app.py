@@ -2,11 +2,20 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import json
 import sys
+import re  # Regex kullanarak isimleri normalize etmek için
 
 app = Flask(__name__)
 
 # Excel dosyasının yolu
 EXCEL_FILE_PATH = r"C:\Users\Acer\PycharmProjects\PROLAB_3\PROLAB 3 - GUNCEL DATASET.xlsx"
+
+def clean_name(name):
+    """
+    Yazar isimlerini tamamen temizler ve normalize eder.
+    """
+    name = re.sub(r'\s+', ' ', name.strip())  # Çift boşlukları tek boşluk yapar
+    name = re.sub(r"[^\w\s]", '', name)  # Özel karakterleri kaldırır (sadece harf ve boşluk bırakır)
+    return name.lower()  # Küçük harf
 
 def create_graph(file_path):
     try:
@@ -14,16 +23,18 @@ def create_graph(file_path):
     except Exception as e:
         raise ValueError(f"Excel dosyası okunamadı: {e}")
 
-    G = {}
-    author_papers = {}
+    G = {}  # Ana graf yapısı
+    author_papers = {}  # Yazarların makale listelerini tutar
 
     for _, row in df.iterrows():
-        # Yazar isimlerini temizle
-        main_author = str(row['author_name']).strip().strip("'").strip('"').strip('[]')
+        # Ana yazar ismini temizle ve normalize et
+        main_author = clean_name(str(row['author_name']))
+
+        # Ortak yazarları temizle ve normalize et
         coauthors = [
-            coauthor.strip().strip("'").strip('"').strip('[]')
+            clean_name(coauthor)
             for coauthor in str(row['coauthors']).split(",")
-            if coauthor.strip()
+            if clean_name(coauthor) and clean_name(coauthor) != main_author
         ]
 
         paper_title = str(row['paper_title']).strip()
@@ -33,29 +44,37 @@ def create_graph(file_path):
             author_papers[main_author] = []
         author_papers[main_author].append(paper_title)
 
-        # Ana yazar düğümünü ekle
+        # Ana yazarı graf yapısına ekle
         if main_author not in G:
             G[main_author] = {}
 
         # Ortak yazarları ekle
-        for co_author in coauthors:
-            if co_author not in author_papers:
-                author_papers[co_author] = []
-            author_papers[co_author].append(paper_title)
+        for coauthor in coauthors:
+            if coauthor == main_author:  # Kendi kendine bağlantı kontrolü
+                continue
 
-            if co_author not in G:
-                G[co_author] = {}
+            if coauthor not in author_papers:
+                author_papers[coauthor] = []
+            author_papers[coauthor].append(paper_title)
 
-            # Kenar mevcutsa ağırlığı arttır, yoksa yeni ekle
-            if co_author in G[main_author]:
-                G[main_author][co_author] += 1
+            if coauthor not in G:
+                G[coauthor] = {}
+
+            # Graf üzerinde kenar ekleme işlemi
+            if coauthor in G[main_author]:
+                G[main_author][coauthor] += 1  # Var olan kenarın ağırlığını artır
             else:
-                G[main_author][co_author] = 1
+                G[main_author][coauthor] = 1  # Yeni kenar oluştur
 
-            if main_author in G[co_author]:
-                G[co_author][main_author] += 1
+            if main_author in G[coauthor]:
+                G[coauthor][main_author] += 1
             else:
-                G[co_author][main_author] = 1
+                G[coauthor][main_author] = 1
+
+    # Kendi kendine bağlantıları tamamen silme (kontrol için güvence)
+    for author in G:
+        if author in G[author]:
+            del G[author][author]
 
     return G, author_papers
 

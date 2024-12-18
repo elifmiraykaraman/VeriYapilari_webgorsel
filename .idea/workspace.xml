@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="1 ve  4. ister açlışmıyor. 5, 6 ve 7 . isterler test edilidi doğru çalışıyor. 2 ve 3 denenmedi.">
+    <list default="true" id="b2a80ca2-54bc-4b76-934f-40f728828f28" name="Changes" comment="network kütüphanesini kaldırdım. bütün isterler çalışıyor. veri setinin tamamı kullanılıyor.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/script.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +126,8 @@
       <workItem from="1734341102003" duration="4446000" />
       <workItem from="1734345854574" duration="4380000" />
       <workItem from="1734424357954" duration="9706000" />
-      <workItem from="1734527395380" duration="7204000" />
+      <workItem from="1734527395380" duration="8159000" />
+      <workItem from="1734543091224" duration="3717000" />
     </task>
     <task id="LOCAL-00001" summary="istenilen sayfa düzenine ulaşıldı">
       <option name="closed" value="true" />
@@ -177,7 +177,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734351586328</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="network kütüphanesini kaldırdım. bütün isterler çalışıyor. veri setinin tamamı kullanılıyor.">
+      <option name="closed" value="true" />
+      <created>1734534873983</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1734534873983</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -190,7 +198,8 @@
     <MESSAGE value="düğümlerin büyüklükleri ve renkleri isterlere göre güncellendi." />
     <MESSAGE value="sayfa düzenlemesi yapıldı." />
     <MESSAGE value="1 ve  4. ister açlışmıyor. 5, 6 ve 7 . isterler test edilidi doğru çalışıyor. 2 ve 3 denenmedi." />
-    <option name="LAST_COMMIT_MESSAGE" value="1 ve  4. ister açlışmıyor. 5, 6 ve 7 . isterler test edilidi doğru çalışıyor. 2 ve 3 denenmedi." />
+    <MESSAGE value="network kütüphanesini kaldırdım. bütün isterler çalışıyor. veri setinin tamamı kullanılıyor." />
+    <option name="LAST_COMMIT_MESSAGE" value="network kütüphanesini kaldırdım. bütün isterler çalışıyor. veri setinin tamamı kullanılıyor." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PROLAB_3$PROLAB_3.coverage" NAME="PROLAB_3 Coverage Results" MODIFIED="1734261960929" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
