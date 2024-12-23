@@ -77,6 +77,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 ? `<b>${data.result}</b>`
                 : `<b style="color:red;">Hata:</b> ${data.result}`;
 
+
+            // Kuyruk işlemleri için görselleştirme
+        if (action === 'priority_queue' && data.queue_operations) {
+            visualizeQueueOperations(data.queue_operations);
+        }
+
             // Eğer vurgulanacak düğüm varsa
             if (data.highlight_nodes) {
                 highlightNodesWithAnimation(data.highlight_nodes);
@@ -87,6 +93,23 @@ document.addEventListener("DOMContentLoaded", function () {
             outputContent.innerHTML = `<pre style="color:red;">Sunucu hatası!</pre>`;
         });
     }
+
+// Kuyruk işlemlerini görselleştir
+function visualizeQueueOperations(queueSteps) {
+    const outputContent = document.getElementById('output-content');
+    outputContent.innerHTML = ""; // Önceki içeriği temizle
+
+    // Her adımı birer birer göster
+    queueSteps.forEach((step, index) => {
+        setTimeout(() => {
+            const queueItem = document.createElement('div');
+            queueItem.className = 'queue-item';
+            queueItem.innerText = step;
+            outputContent.appendChild(queueItem);
+        }, index * 1000); // Her adımı 1 saniye aralıkla göster
+    });
+}
+
 
     // Belirtilen düğümleri kırmızıya çevirip 2 saniye sonra eski haline döndüren fonksiyon
     function highlightNodesWithAnimation(highlightNodes) {

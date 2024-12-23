@@ -6,12 +6,12 @@
     <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
     <link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" />
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { height: 100%; display: flex; font-family: Arial, sans-serif; overflow: hidden; }
+        /* Genel Stil */
+        body, html { margin: 0; padding: 0; height: 100%; display: flex; font-family: Arial, sans-serif; overflow: hidden; }
         #output {
             width: 20%; background-color: #f9f9f9; border-right: 1px solid #ccc;
             display: flex; flex-direction: column; padding: 10px;
-            overflow-y: auto; /* ÇIKTI EKRANI kaydırma */
+            overflow-y: auto;
         }
         #network { flex: 1; height: 100vh; border: 1px solid lightgray; }
         #controls {
@@ -27,6 +27,14 @@
         button:hover { background-color: #45a049; }
         input {
             width: 100%; padding: 5px; margin: 5px 0; border: 1px solid #ccc; border-radius: 3px;
+        }
+        .queue-animation {
+            background-color: #FFDD57;
+            color: black;
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid #333;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -50,7 +58,7 @@
 
         <h3>2. Queue Oluştur</h3>
         <input type="text" id="author_queue" placeholder="A Yazar Adı">
-        <button onclick="processRequest('priority_queue', 'author_queue')">Queue'yu Oluştur</button>
+        <button onclick="processQueue('priority_queue', 'author_queue')">Queue'yu Oluştur</button>
 
         <h3>3. BST Oluştur</h3>
         <input type="text" id="author_bst" placeholder="A Yazar Adı">
@@ -74,7 +82,43 @@
 
     <!-- JavaScript -->
     <script>
-        // Sunucuya istek gönderme fonksiyonu
+        // Kuyruk işlemlerini canlı göstermek için
+        function processQueue(action, inputId) {
+            const input = document.getElementById(inputId)?.value || '';
+            fetch('/process_request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action, author_a: input })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showQueueAnimation(data.queue_steps);
+                    document.getElementById('output-content').innerHTML = `<b>${data.result}</b>`;
+                } else {
+                    document.getElementById('output-content').innerHTML = `<b>Hata:</b> ${data.result}`;
+                }
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                document.getElementById('output-content').innerHTML = "Sunucu hatası!";
+            });
+        }
+
+        function showQueueAnimation(queueSteps) {
+            const outputContent = document.getElementById('output-content');
+            outputContent.innerHTML = ''; // Önceki içeriği temizle
+            queueSteps.forEach((step, index) => {
+                setTimeout(() => {
+                    const queueItem = document.createElement('div');
+                    queueItem.className = 'queue-animation';
+                    queueItem.innerText = step;
+                    outputContent.appendChild(queueItem);
+                }, index * 1000); // Her bir elemanı 1 saniye aralıkla göster
+            });
+        }
+
+        // Sunucuya istek gönderme
         function processRequest(action, inputId1, inputId2 = null) {
             const input1 = document.getElementById(inputId1)?.value || '';
             const input2 = inputId2 ? document.getElementById(inputId2)?.value || '' : '';

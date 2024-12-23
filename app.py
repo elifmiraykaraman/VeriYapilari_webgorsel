@@ -275,14 +275,17 @@ def process_request():
 
             # Priority queue: sort collaborators by weight descending
             collaborators = G[author_a]
-            sorted_queue = sorted(collaborators.items(), key=lambda x: x[1], reverse=True)
-            queue_nodes = [author_a] + [node for node, _ in sorted_queue]
-            queue_text = "<br>".join([f"{co_author}: {weight}" for co_author, weight in sorted_queue])
+            sorted_collaborators = sorted(collaborators.items(), key=lambda x: x[1], reverse=True)
+
+            # Kuyruğa adım adım eklenen elemanları göstermek için
+            queue_steps = []
+            for collaborator, weight in sorted_collaborators:
+                queue_steps.append(f"{collaborator}: {weight}")
 
             return jsonify({
                 'status': 'success',
-                'result': f"Priority Queue:<br>{queue_text}",
-                'highlight_nodes': queue_nodes
+                'result': f"Queue başarıyla oluşturuldu. Toplam: {len(sorted_collaborators)} kişi.",
+                'queue_steps': queue_steps
             })
 
         elif action == 'create_bst':
@@ -313,23 +316,24 @@ def process_request():
             # Dijkstra all shortest paths
             paths, distances = dijkstra_all_shortest_paths(G, author_a)
 
-            # Prepare result_text sadece girilen yazarın yollarını içerecek şekilde
+            # Sadece `author_a` ile başlayan yolları alın
+            filtered_paths = {node: path for node, path in paths.items() if
+                              path and path[0] == author_a and node != author_a}
+
+            # Sonuçları metin formatında oluşturun
             result_text = "<br>".join(
-                [f"{node}: {' → '.join(path)} (Uzunluk: {distances[node]})"
-                 for node, path in paths.items()
-                 if path and path[0] == author_a]
+                [f"{node}: {' → '.join(path)} (Uzunluk: {distances[node]})" for node, path in filtered_paths.items()]
             )
 
-            # Sadece girilen yazarın yollarındaki düğümleri vurgulama
+            # Sadece `author_a` ile bağlantılı düğümleri vurgulayın
             highlight_nodes = set()
-            for path in paths.values():
-                if path and path[0] == author_a:
-                    highlight_nodes.update(path)
-            highlight_nodes = list(highlight_nodes)
+            for path in filtered_paths.values():
+                highlight_nodes.update(path)
+            highlight_nodes = list(highlight_nodes)  # `set`'i `list`'e dönüştürdük
 
             return jsonify({
                 'status': 'success',
-                'result': f"<b>Tüm Kısa Yollar:</b><br>{result_text}",
+                'result': f"<b>{author_a} ile diğer yazarlar arasındaki kısa yollar:</b><br>{result_text}",
                 'highlight_nodes': highlight_nodes
             })
 
