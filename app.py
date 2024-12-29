@@ -6,13 +6,9 @@ import re  # Regex kullanarak isimleri normalize etmek için
 
 app = Flask(__name__)
 
-# Excel dosyasının yolu
 EXCEL_FILE_PATH = r"C:\Users\Acer\PycharmProjects\PROLAB_3\PROLAB 3 - GUNCEL DATASET.xlsx"
 
 def clean_name(name):
-    """
-    Yazar isimlerini tamamen temizler ve normalize eder.
-    """
     name = re.sub(r'\s+', ' ', name.strip())  # Çift boşlukları tek boşluk yapar
     name = re.sub(r"[^\w\s]", '', name)  # Özel karakterleri kaldırır (sadece harf ve boşluk bırakır)
     return name.lower()  # Küçük harf
@@ -62,9 +58,9 @@ def create_graph(file_path):
 
             # Graf üzerinde kenar ekleme işlemi
             if coauthor in G[main_author]:
-                G[main_author][coauthor] += 1  # Var olan kenarın ağırlığını artır
+                G[main_author][coauthor] += 1  # Var olan kenarın ağırlığını arttırma
             else:
-                G[main_author][coauthor] = 1  # Yeni kenar oluştur
+                G[main_author][coauthor] = 1  # Yeni kenar oluşturmak
 
             if main_author in G[coauthor]:
                 G[coauthor][main_author] += 1
@@ -79,7 +75,7 @@ def create_graph(file_path):
     return G, author_papers
 
 def graph_to_json(G, author_papers):
-    # Toplam kenar ağırlıklarını ve dereceyi hesapla
+    # Toplam kenar ağırlıklarını ve dereceyi hesaplamak
     total_weights = {}
     degrees = {}
 
@@ -88,7 +84,7 @@ def graph_to_json(G, author_papers):
         total_weights[node] = total_weight
         degrees[node] = len(G[node])
 
-    # Ortalama kenar ağırlığı ve eşik değeri
+    # Ortalama kenar ağırlığı ve eşik değerini hesaplamak
     total_sum = sum(total_weights.values())
     average_weight = total_sum / len(total_weights) if total_weights else 0
     threshold = average_weight * 1.2
@@ -105,12 +101,15 @@ def graph_to_json(G, author_papers):
             size = 10 + degree * 1.5
             color = "lightblue"
 
+        papers = author_papers.get(node, [])
         nodes_data.append({
             'id': node,
             'label': node,
-            'title': f"Yazar: {node}<br>Makaleler: {', '.join(author_papers.get(node, []))}",
+            'title': f"Yazar: {node}<br>Makaleler: {', '.join(papers)}",
             'size': size,
-            'color': color
+            'color': color,
+            'paper_count': len(papers),  # Makale sayısı
+            'paper_titles': papers          # Makale başlıkları
         })
 
     # Kenarlar JSON
@@ -273,7 +272,7 @@ def process_request():
             if author_a not in G:
                 raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
 
-            # Priority queue: sort collaborators by weight descending
+            # Yazarın işbirlikçilerini ağırlıklarına göre sıralamak
             collaborators = G[author_a]
             sorted_collaborators = sorted(collaborators.items(), key=lambda x: x[1], reverse=True)
 
@@ -295,11 +294,11 @@ def process_request():
             if author_a not in G:
                 raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
 
-            # Get sorted list of collaborators
+            # Ortak çalışanların sıralı listesini alın
             collaborators = sorted(G[author_a].keys())
 
-            # Create BST (but since it's backend, just return sorted list)
-            # Normally, BST structure would require more details, but for visualization, sorted list suffices
+            # BST oluşturun (ancak arka uç olduğu için yalnızca sıralanmış listeyi döndürün)
+            # Normalde BST yapısı daha fazla ayrıntı gerektirir ancak görsellik için sıralı liste yeterlidir
             return jsonify({
                 'status': 'success',
                 'result': f"BST Oluşturulan Düğümler: {', '.join(collaborators)}",
@@ -313,7 +312,7 @@ def process_request():
             if author_a not in G:
                 raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
 
-            # Dijkstra all shortest paths
+            # Dijkstra'nın tüm en kısa yolları
             paths, distances = dijkstra_all_shortest_paths(G, author_a)
 
             # Sadece `author_a` ile başlayan yolları alın
@@ -367,7 +366,7 @@ def process_request():
             if author_a not in G:
                 raise ValueError(f"{author_a} graf içerisinde bulunamadı.")
 
-            # Find the longest path from author_a
+            # Author_a'dan en uzun yolu bulun
             longest_path = find_longest_path(G, author_a)
             if not longest_path:
                 raise ValueError(f"{author_a} ile herhangi bir yazar arasında yol bulunamadı.")

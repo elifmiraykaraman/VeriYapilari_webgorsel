@@ -50,7 +50,7 @@
 
     <!-- Sağ Kontrol Paneli -->
     <div id="controls">
-        <h2>İsterler</h2>
+        <h2>İşlemler</h2>
         <h3>1. En Kısa Yol Bulma</h3>
         <input type="text" id="author_a" placeholder="A Yazar Adı">
         <input type="text" id="author_b" placeholder="B Yazar Adı">
@@ -64,7 +64,7 @@
         <input type="text" id="author_bst" placeholder="A Yazar Adı">
         <button onclick="processRequest('create_bst', 'author_bst')">BST'yi Oluştur</button>
 
-        <h3>4. Kısa Yollar Hesapla</h3>
+        <h3>4. Kısa Yolları Hesapla</h3>
         <input type="text" id="author_shortest_all" placeholder="A Yazar Adı">
         <button onclick="processRequest('shortest_paths_all', 'author_shortest_all')">Kısa Yolları Hesapla</button>
 
@@ -82,6 +82,97 @@
 
     <!-- JavaScript -->
     <script>
+        let networkInstance, nodes, edges; // Global değişkenler
+        let graphDataGlobal; // Grafik verisini global olarak saklamak için
+
+        // Ekran boyutu değiştiğinde grafiği otomatik boyutlandırmak için fonksiyon
+        function resizeNetwork(network) {
+            window.addEventListener("resize", () => {
+                network.setSize("100%", "100%");
+                network.redraw();
+            });
+        }
+
+        // Flask'teki "/get_graph_data" endpoint'inden grafik verisini çekme
+        function fetchGraphData() {
+            return fetch("/get_graph_data")
+                .then(response => {
+                    if (!response.ok) throw new Error("Veri çekilemedi! HTTP Hatası: " + response.status);
+                    return response.json();
+                });
+        }
+
+        // Grafiği oluşturma fonksiyonu
+        function createNetwork(graphData) {
+            graphDataGlobal = graphData; // Grafik verisini global olarak sakla
+            nodes = new vis.DataSet(graphData.nodes);
+            edges = new vis.DataSet(graphData.edges);
+
+            const data = { nodes: nodes, edges: edges };
+            const options = {
+                nodes: {
+                    shape: "dot",
+                    font: { size: 14, color: "#333" },
+                    borderWidth: 2,
+                    scaling: { min: 10, max: 30 }
+                },
+                edges: {
+                    width: 2,
+                    color: { color: "#848484", highlight: "#3c3c3c" }
+                },
+                interaction: { hover: true, tooltipDelay: 200 },
+                physics: {
+                    enabled: true,
+                    solver: "forceAtlas2Based",
+                    stabilization: { iterations: 100 }
+                },
+                layout: { improvedLayout: true }
+            };
+
+            networkInstance = new vis.Network(document.getElementById("network"), data, options);
+            resizeNetwork(networkInstance);
+
+            // Düğüm üzerine tıklandığında bilgi göster
+            networkInstance.on("selectNode", function (params) {
+                const nodeId = params.nodes[0];
+                const node = nodes.get(nodeId); // Vis.js DataSet kullanarak düğümü al
+
+                if (node) {
+                    // Makale sayısını ve başlıklarını al
+                    const paperCount = node.paper_count;
+                    const paperTitles = node.paper_titles;
+
+                    // HTML içeriğini oluştur
+                    let htmlContent = `<b>Seçilen Yazar:</b> ${node.label}<br>`;
+                    htmlContent += `<b>Toplam Makale:</b> ${paperCount}<br>`;
+                    if (paperTitles.length > 0) {
+                        htmlContent += `<b>Makale Başlıkları:</b><ul>`;
+                        paperTitles.forEach(title => {
+                            htmlContent += `<li>${title}</li>`;
+                        });
+                        htmlContent += `</ul>`;
+                    } else {
+                        htmlContent += `<b>Makale Başlıkları:</b> Yok.`;
+                    }
+
+                    document.getElementById('output-content').innerHTML = htmlContent;
+                }
+            });
+        }
+
+        // Sunucudan veri al ve grafiği güncelle
+        function initializeNetwork() {
+            fetchGraphData()
+                .then(graphData => {
+                    createNetwork(graphData); // Grafiği oluştur
+                    // setupButtons(); // Butonları aktif hale getir (Artık butonlar inline onclick kullanıyor)
+                })
+                .catch(error => {
+                    console.error("Grafik verisi yüklenirken hata oluştu:", error);
+                    alert("Grafik verisi yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+                });
+        }
+
         // Kuyruk işlemlerini canlı göstermek için
         function processQueue(action, inputId) {
             const input = document.getElementById(inputId)?.value || '';
@@ -96,7 +187,7 @@
                     showQueueAnimation(data.queue_steps);
                     document.getElementById('output-content').innerHTML = `<b>${data.result}</b>`;
                 } else {
-                    document.getElementById('output-content').innerHTML = `<b>Hata:</b> ${data.result}`;
+                    document.getElementById('output-content').innerHTML = `<b style="color:red;">Hata:</b> ${data.result}`;
                 }
             })
             .catch(error => {
@@ -130,34 +221,53 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('output-content').innerHTML = data.status === 'success'
-                    ? `<b>${data.result}</b>`
-                    : `<b>Hata:</b> ${data.result}`;
+                if (data.status === 'success') {
+                    document.getElementById('output-content').innerHTML = `<b>${data.result}</b>`;
+                } else {
+                    document.getElementById('output-content').innerHTML = `<b style="color:red;">Hata:</b> ${data.result}`;
+                }
+
+                // Kuyruk işlemleri için görselleştirme
+                if (action === 'priority_queue' && data.queue_steps) {
+                    showQueueAnimation(data.queue_steps);
+                }
+
+                // Eğer vurgulanacak düğüm varsa
+                if (data.highlight_nodes) {
+                    highlightNodesWithAnimation(data.highlight_nodes);
+                }
             })
             .catch(error => {
                 console.error('Hata:', error);
-                document.getElementById('output-content').innerHTML = "Sunucu hatası!";
+                document.getElementById('output-content').innerHTML = `<pre style="color:red;">Sunucu hatası!</pre>`;
             });
         }
 
-        // Grafiği oluşturma
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch("/get_graph_data")
-                .then(response => response.json())
-                .then(graphData => {
-                    const container = document.getElementById("network");
-                    const nodes = new vis.DataSet(graphData.nodes);
-                    const edges = new vis.DataSet(graphData.edges);
+        // Belirtilen düğümleri kırmızıya çevirip 2 saniye sonra eski haline döndüren fonksiyon
+        function highlightNodesWithAnimation(highlightNodes) {
+            // Düğümleri kırmızıya çevir
+            highlightNodes.forEach(nodeId => {
+                nodes.update({ id: nodeId, color: { background: 'red', border: 'darkred' } });
+            });
 
-                    const options = {
-                        nodes: { shape: "dot", scaling: { min: 10, max: 30 } },
-                        edges: { color: { color: "#848484", highlight: "#3c3c3c" } },
-                        physics: { enabled: true, solver: "forceAtlas2Based" },
-                        layout: { improvedLayout: true }
-                    };
-                    new vis.Network(container, { nodes, edges }, options);
-                })
-                .catch(error => console.error("Grafik verisi yüklenirken hata oluştu:", error));
+            // 2 saniye sonra düğümleri eski haline getir
+            setTimeout(() => {
+                highlightNodes.forEach(nodeId => {
+                    const originalNode = graphDataGlobal.nodes.find(n => n.id === nodeId);
+                    if (originalNode && originalNode.color) {
+                        nodes.update({ id: nodeId, color: { background: originalNode.color, border: 'darkblue' } });
+                    } else {
+                        // Varsayılan renkler
+                        nodes.update({ id: nodeId, color: { background: 'lightblue', border: 'darkblue' } });
+                    }
+                });
+            }, 2000);
+        }
+
+        // Sayfa yüklendiğinde yapılacak işlemler
+        document.addEventListener("DOMContentLoaded", function () {
+            initializeNetwork(); // Grafiği oluştur
+            // setupButtons(); // Butonları aktif hale getir (Artık butonlar inline onclick kullanıyor)
         });
     </script>
 </body>

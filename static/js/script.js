@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const outputContent = document.getElementById("output-content");
 
     let network, nodes, edges; // Global değişkenler
+    let graphDataGlobal; // Grafik verisini global olarak saklamak için
 
     // Ekran boyutu değiştiğinde grafiği otomatik boyutlandırmak için fonksiyon
     function resizeNetwork(network) {
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Grafiği oluşturma fonksiyonu
     function createNetwork(graphData) {
+        graphDataGlobal = graphData; // Grafik verisini global olarak sakla
         nodes = new vis.DataSet(graphData.nodes);
         edges = new vis.DataSet(graphData.edges);
 
@@ -53,9 +55,23 @@ document.addEventListener("DOMContentLoaded", function () {
         // Düğüm üzerine tıklandığında bilgi göster
         network.on("selectNode", function (params) {
             const nodeId = params.nodes[0];
-            const node = graphData.nodes.find(n => n.id === nodeId);
+            const node = nodes.get(nodeId); // Vis.js DataSet kullanarak düğümü al
+
             if (node) {
-                outputContent.innerHTML = `<b>Seçilen Yazar:</b> ${node.label}<br><b>Toplam Makale:</b> ${node.title}`;
+                // Makale sayısını ve başlıklarını al
+                const paperCount = node.paper_count;
+                const paperTitles = node.paper_titles;
+
+                // HTML içeriğini oluştur
+                let htmlContent = `<b>Seçilen Yazar:</b> ${node.label}<br>`;
+                htmlContent += `<b>Toplam Makale:</b> ${paperCount}<br>`;
+                htmlContent += `<b>Makale Başlıkları:</b><ul>`;
+                paperTitles.forEach(title => {
+                    htmlContent += `<li>${title}</li>`;
+                });
+                htmlContent += `</ul>`;
+
+                outputContent.innerHTML = htmlContent;
             }
         });
     }
@@ -79,9 +95,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             // Kuyruk işlemleri için görselleştirme
-        if (action === 'priority_queue' && data.queue_operations) {
-            visualizeQueueOperations(data.queue_operations);
-        }
+            if (action === 'priority_queue' && data.queue_steps) {
+                visualizeQueueOperations(data.queue_steps);
+            }
 
             // Eğer vurgulanacak düğüm varsa
             if (data.highlight_nodes) {
@@ -94,21 +110,21 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-// Kuyruk işlemlerini görselleştir
-function visualizeQueueOperations(queueSteps) {
-    const outputContent = document.getElementById('output-content');
-    outputContent.innerHTML = ""; // Önceki içeriği temizle
+    // Kuyruk işlemlerini görselleştir
+    function visualizeQueueOperations(queueSteps) {
+        const outputContent = document.getElementById('output-content');
+        outputContent.innerHTML = ""; // Önceki içeriği temizle
 
-    // Her adımı birer birer göster
-    queueSteps.forEach((step, index) => {
-        setTimeout(() => {
-            const queueItem = document.createElement('div');
-            queueItem.className = 'queue-item';
-            queueItem.innerText = step;
-            outputContent.appendChild(queueItem);
-        }, index * 1000); // Her adımı 1 saniye aralıkla göster
-    });
-}
+        // Her adımı birer birer göster
+        queueSteps.forEach((step, index) => {
+            setTimeout(() => {
+                const queueItem = document.createElement('div');
+                queueItem.className = 'queue-item';
+                queueItem.innerText = step;
+                outputContent.appendChild(queueItem);
+            }, index * 1000); // Her adımı 1 saniye aralıkla göster
+        });
+    }
 
 
     // Belirtilen düğümleri kırmızıya çevirip 2 saniye sonra eski haline döndüren fonksiyon
@@ -121,7 +137,8 @@ function visualizeQueueOperations(queueSteps) {
         // 2 saniye sonra düğümleri eski haline getir
         setTimeout(() => {
             highlightNodes.forEach(nodeId => {
-                nodes.update({ id: nodeId, color: { background: 'blue', border: 'darkblue' } });
+                const originalColor = graphDataGlobal.nodes.find(n => n.id === nodeId).color;
+                nodes.update({ id: nodeId, color: { background: originalColor, border: 'darkblue' } });
             });
         }, 2000);
     }
